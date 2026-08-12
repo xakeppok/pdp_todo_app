@@ -10,12 +10,23 @@ jobs:
   update-goldens:
     name: Regenerate and commit goldens
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: 4569817
+          private-key: ${{ secrets.GOLDEN_UPDATER_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+          token: ${{ steps.app-token.outputs.token }}
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.44.9"
           channel: stable
@@ -28,15 +39,16 @@ jobs:
         run: flutter test --update-goldens test/golden
 
       - name: Commit and push
-        env:
-          GH_TOKEN: ${{ secrets.GOLDEN_UPDATE_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "Golden Updater"
+          git config user.email "golden-updater[bot]@users.noreply.github.com"
+
           git add test/golden/goldens/
+
           if git diff --staged --quiet; then
             echo "No golden PNG changes"
             exit 0
           fi
+
           git commit -m "chore: update golden images"
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
