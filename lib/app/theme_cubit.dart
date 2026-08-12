@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Controls [ThemeMode] for the app (system → light → dark → system).
 class ThemeCubit extends Cubit<ThemeMode> {
   ThemeCubit([super.initial = ThemeMode.system]);
 

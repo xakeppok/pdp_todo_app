@@ -12,7 +12,6 @@ class TodoInput {
   final String title;
   final String description;
   final String priority;
-  /// Date-only string expected as `YYYY-MM-DD`.
   final String dueDateInput;
   final List<String> tags;
 }
@@ -38,7 +37,6 @@ class TodoValidator {
 
   static const maxTitleLength = 100;
 
-  /// Validates title and date-only input before constructing DateTime.
   ValidatedTodoInput validate(TodoInput input) {
     final title = input.title.trim();
     if (title.isEmpty) {
@@ -65,8 +63,6 @@ class TodoValidator {
     );
   }
 
-  /// Parses `YYYY-MM-DD` and rejects non-existent calendar dates
-  /// (e.g. 2026-02-30) without relying on DateTime normalization.
   DateTime parseDateOnly(String raw) {
     final value = raw.trim();
     final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(value);

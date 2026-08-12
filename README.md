@@ -18,10 +18,21 @@ Cheat sheet (pyramid, tools, **what to test where**, snippets): [docs/testing-st
 
 Goldens (generate / update / review): [docs/goldens.md](docs/goldens.md)
 
-## Run the app
+## Setup
 
 ```bash
 flutter pub get
+
+# one-time: install Lefthook, then wire git hooks for this clone
+brew install lefthook   # https://lefthook.dev — other installers also fine
+lefthook install
+```
+
+`lefthook install` writes into `.git/hooks/`. Without it, commits skip the local CI gates. Re-run after a fresh clone.
+
+## Run the app
+
+```bash
 flutter run
 ```
 
@@ -47,6 +58,23 @@ flutter test --exclude-tags golden test/
 # integration: CI uses Android emulator; desktop is smoke only
 flutter test integration_test/
 ```
+
+### Commit hooks (same as CI `test` job)
+
+After `lefthook install`, every commit runs the CI `test` job gates from `lefthook.yml`:
+
+1. `flutter analyze --fatal-infos`
+2. `flutter test test/` (on macOS/Windows: `--exclude-tags golden`)
+
+Android integration tests stay CI-only.
+
+```bash
+lefthook install          # required once per clone
+lefthook run pre-commit   # run the gates without committing
+LEFTHOOK=0 git commit ... # skip hooks once
+```
+
+Details: [docs/ci-and-flaky-tests.md](docs/ci-and-flaky-tests.md).
 
 ### Coverage
 

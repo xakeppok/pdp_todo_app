@@ -179,7 +179,6 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     ));
   }
 
-  /// Keeps Loading / Error / Initial shape; rebuilds list for data states.
   TodosState _rebuildWith({
     required List<Todo> allTodos,
     required TodoFilter filter,

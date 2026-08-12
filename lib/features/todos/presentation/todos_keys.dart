@@ -4,7 +4,6 @@ import 'package:pdp_todo_app/features/todos/domain/entities/todo_filter.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_priority.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_sort.dart';
 
-/// Shared [Key]s for todos UI and tests.
 abstract final class TodosKeys {
   static const page = Key('todos_page');
   static const createFab = Key('todos_create_fab');
@@ -59,7 +58,6 @@ abstract final class TodosKeys {
 
   static Key tag(String tag) => Key('todo_tag_$tag');
 
-  /// Keys used by the stub routes in widget tests.
   static const createRouteStub = Key('create_route_stub');
 
   static Key detailsRouteStub(String id) => Key('details_route_stub_$id');

@@ -8,7 +8,6 @@ import 'package:pdp_todo_app/features/todos/presentation/bloc/todo_form_cubit.da
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
 
-/// Create page — cubit is provided by the router/composition root.
 class CreateTodoPage extends StatelessWidget {
   const CreateTodoPage({super.key});
 
@@ -21,7 +20,6 @@ class CreateTodoPage extends StatelessWidget {
   }
 }
 
-/// Edit page — cubit is provided by the router/composition root.
 class EditTodoPage extends StatelessWidget {
   const EditTodoPage({super.key});
 

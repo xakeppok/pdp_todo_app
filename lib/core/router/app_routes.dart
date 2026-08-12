@@ -1,4 +1,3 @@
-/// Canonical locations and path segments for [GoRouter].
 abstract final class AppRoutes {
   static const root = '/';
   static const todos = '/todos';

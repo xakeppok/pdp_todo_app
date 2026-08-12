@@ -10,7 +10,6 @@ class DataSourceException implements Exception {
   String toString() => 'DataSourceException: $message';
 }
 
-/// Stateful in-memory fake used by the app and integration tests.
 class InMemoryTodoDataSource implements TodoDataSource {
   InMemoryTodoDataSource({
     List<TodoModel>? seed,
