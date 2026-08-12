@@ -44,18 +44,16 @@ Future<void> configureDependencies({
   getIt
     ..registerSingleton<Clock>(resolvedClock)
     ..registerSingleton<TodoDataSource>(resolvedDataSource)
-    ..registerLazySingleton<TodoValidator>(() => const TodoValidator())
-    ..registerLazySingleton<TodoQuery>(() => const TodoQuery())
     ..registerLazySingleton<TodoRepository>(
       () => TodoRepositoryImpl(getIt<TodoDataSource>()),
     )
     ..registerLazySingleton(() => GetTodos(getIt()))
     ..registerLazySingleton(() => GetTodoById(getIt()))
     ..registerLazySingleton(
-      () => CreateTodo(getIt(), getIt<TodoValidator>()),
+      () => CreateTodo(getIt(), const TodoValidator()),
     )
     ..registerLazySingleton(
-      () => UpdateTodo(getIt(), getIt<TodoValidator>()),
+      () => UpdateTodo(getIt(), const TodoValidator()),
     )
     ..registerLazySingleton(() => DeleteTodo(getIt()))
     ..registerLazySingleton(() => ToggleTodoCompletion(getIt()));
@@ -66,7 +64,7 @@ TodosBloc createTodosBloc() {
     getTodos: getIt(),
     deleteTodo: getIt(),
     toggleTodoCompletion: getIt(),
-    todoQuery: getIt(),
+    todoQuery: const TodoQuery(),
     clock: getIt(),
   );
 }
@@ -101,4 +99,8 @@ GoRouter createConfiguredRouter({String initialLocation = AppRoutes.todos}) {
 
 void setDataSourceFailureMode(FailureMode mode) {
   getIt<TodoDataSource>().failureMode = mode;
+}
+
+FailureMode getDataSourceFailureMode() {
+  return getIt<TodoDataSource>().failureMode;
 }

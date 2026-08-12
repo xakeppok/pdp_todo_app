@@ -67,7 +67,7 @@ class _TodoAppState extends State<TodoApp> {
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {
           return MaterialApp.router(
-            title: 'PDP Todo Testing Reference',
+            title: 'PDP Todo',
             theme: buildLightTheme(),
             darkTheme: buildDarkTheme(),
             themeMode: themeMode,

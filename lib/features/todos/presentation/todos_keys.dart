@@ -18,6 +18,7 @@ abstract final class TodosKeys {
   static const filterBar = Key('todo_filter_bar');
   static const sortMenu = Key('todo_sort_menu');
   static const themeToggle = Key('theme_toggle');
+  static const failureModeToggle = Key('failure_mode_toggle');
 
   static const createPage = Key('create_todo_page');
   static const editPage = Key('edit_todo_page');

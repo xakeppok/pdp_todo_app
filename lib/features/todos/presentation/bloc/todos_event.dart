@@ -68,3 +68,7 @@ final class TodosItemRemoved extends TodosEvent {
   @override
   List<Object?> get props => [id];
 }
+
+final class TodosActionMessageCleared extends TodosEvent {
+  const TodosActionMessageCleared();
+}
