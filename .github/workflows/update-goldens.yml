@@ -28,6 +28,8 @@ jobs:
         run: flutter test --update-goldens test/golden
 
       - name: Commit and push
+        env:
+          GH_TOKEN: ${{ secrets.GOLDEN_UPDATE_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -37,4 +39,4 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update golden images"
-          git push origin "HEAD:${{ github.ref_name }}"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:${{ github.ref_name }}"

@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  push:
     # `TODO(vladyslav.kr): Uncomment this when we have a main branch
+    # push:
     # branches: [main]
   pull_request:
     branches: [main]
