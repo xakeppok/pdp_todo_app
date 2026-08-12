@@ -17,13 +17,28 @@ Current set:
 
 Prefer **Linux** so PNGs match the GitHub Actions `test` job (macOS/Linux Skia + fonts can differ).
 
+### From Mac / Windows (recommended)
+
+1. Push your UI / golden-test changes to a **feature branch**.
+2. GitHub → **Actions** → **Update goldens** → **Run workflow** → select that branch.
+3. The job runs on Ubuntu, regenerates `test/golden/goldens/*.png`, and commits `chore: update golden images` back to the same branch.
+4. `git pull`, review the PNG diff, then open / update your PR.
+
+CLI:
+
+```bash
+gh workflow run update-goldens.yml --ref your-branch
+```
+
+### On Linux locally
+
 ```bash
 flutter test --update-goldens test/golden
 ```
 
 Review the diffed PNGs under `test/golden/goldens/`, then commit them with the test change.
 
-Do **not** pass `--update-goldens` in CI — CI only compares.
+Do **not** pass `--update-goldens` in the regular CI `test` job — that job only compares.
 
 ## Run (compare only)
 

@@ -54,7 +54,7 @@ Optional gitignored `lefthook-local.yml` for machine-specific tweaks.
 
 Generate / update / review: [goldens.md](goldens.md).
 
-Short version: update on **Linux** to match the `test` job; never pass `--update-goldens` in CI.
+Short version: update on **Linux** (manual **Update goldens** workflow or local Linux) to match the `test` job; never pass `--update-goldens` in the regular CI `test` job.
 
 ## Deterministic fixtures
 

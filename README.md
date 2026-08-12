@@ -89,8 +89,12 @@ Goldens: committed PNGs in `test/golden/goldens/` — see [docs/goldens.md](docs
 
 ### Update goldens
 
+Prefer the manual workflow (Ubuntu → commit to your branch): **Actions → Update goldens → Run workflow**.
+
 ```bash
-flutter test --update-goldens test/golden   # prefer Linux
+gh workflow run update-goldens.yml --ref your-branch
+# or on Linux locally:
+flutter test --update-goldens test/golden
 ```
 
 ## Layout
