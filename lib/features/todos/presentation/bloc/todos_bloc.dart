@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
@@ -30,6 +29,7 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     on<TodosDeleteRequested>(_onDeleteRequested);
     on<TodosItemUpserted>(_onItemUpserted);
     on<TodosItemRemoved>(_onItemRemoved);
+    on<TodosActionMessageCleared>(_onActionMessageCleared);
   }
 
   final GetTodos _getTodos;
@@ -46,25 +46,31 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     emit(TodosLoading(filter: filter, sort: sort, allTodos: previousTodos));
     try {
       final allTodos = await _getTodos();
-      emit(_buildVisibleState(
-        allTodos: allTodos,
-        filter: filter,
-        sort: sort,
-      ));
+      emit(
+        _buildVisibleState(
+          allTodos: allTodos,
+          filter: filter,
+          sort: sort,
+        ),
+      );
     } on Failure catch (failure) {
-      emit(TodosError(
-        message: failure.message,
-        filter: filter,
-        sort: sort,
-        allTodos: previousTodos,
-      ));
+      emit(
+        TodosError(
+          message: failure.message,
+          filter: filter,
+          sort: sort,
+          allTodos: previousTodos,
+        ),
+      );
     } on Object catch (error) {
-      emit(TodosError(
-        message: error.toString(),
-        filter: filter,
-        sort: sort,
-        allTodos: previousTodos,
-      ));
+      emit(
+        TodosError(
+          message: error.toString(),
+          filter: filter,
+          sort: sort,
+          allTodos: previousTodos,
+        ),
+      );
     }
   }
 
@@ -72,22 +78,26 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     TodosFilterChanged event,
     Emitter<TodosState> emit,
   ) {
-    emit(_rebuildWith(
-      allTodos: state.allTodos,
-      filter: event.filter,
-      sort: state.sort,
-    ));
+    emit(
+      _rebuildWith(
+        allTodos: state.allTodos,
+        filter: event.filter,
+        sort: state.sort,
+      ),
+    );
   }
 
   void _onSortChanged(
     TodosSortChanged event,
     Emitter<TodosState> emit,
   ) {
-    emit(_rebuildWith(
-      allTodos: state.allTodos,
-      filter: state.filter,
-      sort: event.sort,
-    ));
+    emit(
+      _rebuildWith(
+        allTodos: state.allTodos,
+        filter: state.filter,
+        sort: event.sort,
+      ),
+    );
   }
 
   Future<void> _onToggleCompleted(
@@ -104,18 +114,22 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
         for (final todo in currentTodos)
           if (todo.id == updated.id) updated else todo,
       ];
-      emit(_buildVisibleState(
-        allTodos: allTodos,
-        filter: filter,
-        sort: sort,
-      ));
+      emit(
+        _buildVisibleState(
+          allTodos: allTodos,
+          filter: filter,
+          sort: sort,
+        ),
+      );
     } on Failure catch (failure) {
-      emit(TodosError(
-        message: failure.message,
-        filter: filter,
-        sort: sort,
-        allTodos: currentTodos,
-      ));
+      emit(
+        _buildVisibleState(
+          allTodos: currentTodos,
+          filter: filter,
+          sort: sort,
+          actionMessage: failure.message,
+        ),
+      );
     }
   }
 
@@ -129,20 +143,25 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
 
     try {
       await _deleteTodo(event.id);
-      final allTodos =
-          currentTodos.where((todo) => todo.id != event.id).toList();
-      emit(_buildVisibleState(
-        allTodos: allTodos,
-        filter: filter,
-        sort: sort,
-      ));
+      final allTodos = currentTodos
+          .where((todo) => todo.id != event.id)
+          .toList();
+      emit(
+        _buildVisibleState(
+          allTodos: allTodos,
+          filter: filter,
+          sort: sort,
+        ),
+      );
     } on Failure catch (failure) {
-      emit(TodosError(
-        message: failure.message,
-        filter: filter,
-        sort: sort,
-        allTodos: currentTodos,
-      ));
+      emit(
+        _buildVisibleState(
+          allTodos: currentTodos,
+          filter: filter,
+          sort: sort,
+          actionMessage: failure.message,
+        ),
+      );
     }
   }
 
@@ -159,24 +178,39 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
           ]
         : [...currentTodos, event.todo];
 
-    emit(_rebuildWith(
-      allTodos: allTodos,
-      filter: state.filter,
-      sort: state.sort,
-    ));
+    emit(
+      _rebuildWith(
+        allTodos: allTodos,
+        filter: state.filter,
+        sort: state.sort,
+      ),
+    );
   }
 
   void _onItemRemoved(
     TodosItemRemoved event,
     Emitter<TodosState> emit,
   ) {
-    final allTodos =
-        state.allTodos.where((todo) => todo.id != event.id).toList();
-    emit(_rebuildWith(
-      allTodos: allTodos,
-      filter: state.filter,
-      sort: state.sort,
-    ));
+    final allTodos = state.allTodos
+        .where((todo) => todo.id != event.id)
+        .toList();
+    emit(
+      _rebuildWith(
+        allTodos: allTodos,
+        filter: state.filter,
+        sort: state.sort,
+      ),
+    );
+  }
+
+  void _onActionMessageCleared(
+    TodosActionMessageCleared event,
+    Emitter<TodosState> emit,
+  ) {
+    final current = state;
+    if (current is TodosLoaded && current.actionMessage != null) {
+      emit(current.copyWith(clearActionMessage: true));
+    }
   }
 
   TodosState _rebuildWith({
@@ -187,26 +221,26 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     final snapshot = List<Todo>.from(allTodos);
     return switch (state) {
       TodosInitial() => TodosInitial(
-          filter: filter,
-          sort: sort,
-          allTodos: snapshot,
-        ),
+        filter: filter,
+        sort: sort,
+        allTodos: snapshot,
+      ),
       TodosLoading() => TodosLoading(
-          filter: filter,
-          sort: sort,
-          allTodos: snapshot,
-        ),
+        filter: filter,
+        sort: sort,
+        allTodos: snapshot,
+      ),
       TodosError(:final message) => TodosError(
-          message: message,
-          filter: filter,
-          sort: sort,
-          allTodos: snapshot,
-        ),
+        message: message,
+        filter: filter,
+        sort: sort,
+        allTodos: snapshot,
+      ),
       TodosLoaded() || TodosEmpty() => _buildVisibleState(
-          allTodos: snapshot,
-          filter: filter,
-          sort: sort,
-        ),
+        allTodos: snapshot,
+        filter: filter,
+        sort: sort,
+      ),
     };
   }
 
@@ -214,6 +248,7 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     required List<Todo> allTodos,
     required TodoFilter filter,
     required TodoSort sort,
+    String? actionMessage,
   }) {
     final snapshot = List<Todo>.from(allTodos);
     final visible = _todoQuery.apply(
@@ -234,6 +269,7 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
       filter: filter,
       sort: sort,
       allTodos: snapshot,
+      actionMessage: actionMessage,
     );
   }
 }

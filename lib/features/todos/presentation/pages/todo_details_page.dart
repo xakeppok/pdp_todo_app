@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
@@ -12,7 +11,8 @@ import 'package:pdp_todo_app/features/todos/presentation/widgets/todo_list_item.
 
 class TodoDetailsPage extends StatelessWidget {
   const TodoDetailsPage({
-    required this.clock, super.key,
+    required this.clock,
+    super.key,
   });
 
   final Clock clock;
@@ -32,9 +32,11 @@ class TodoDetailsPage extends StatelessWidget {
               return;
             }
             if (state is TodoDetailsLoaded && state.actionMessage != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.actionMessage!)),
-              );
+              ScaffoldMessenger.of(context)
+                ..clearSnackBars()
+                ..showSnackBar(
+                  SnackBar(content: Text(state.actionMessage!)),
+                );
               context.read<TodoDetailsCubit>().clearActionMessage();
             }
           },
@@ -83,19 +85,19 @@ class TodoDetailsPage extends StatelessWidget {
           builder: (context, state) {
             return switch (state) {
               TodoDetailsInitial() || TodoDetailsLoading() => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                child: CircularProgressIndicator(),
+              ),
               TodoDetailsError(:final message) => Center(
-                  child: Text(
-                    message,
-                    key: TodosKeys.detailsError,
-                  ),
+                child: Text(
+                  message,
+                  key: TodosKeys.detailsError,
                 ),
+              ),
               TodoDetailsDeleted() => const SizedBox.shrink(),
               TodoDetailsLoaded(:final todo) => _TodoDetailsBody(
-                  todo: todo,
-                  clock: clock,
-                ),
+                todo: todo,
+                clock: clock,
+              ),
             };
           },
         ),

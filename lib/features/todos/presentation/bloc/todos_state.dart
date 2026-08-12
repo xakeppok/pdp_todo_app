@@ -37,12 +37,32 @@ final class TodosLoaded extends TodosState {
     required super.allTodos,
     required super.filter,
     required super.sort,
+    this.actionMessage,
   });
 
   final List<Todo> todos;
+  final String? actionMessage;
+
+  TodosLoaded copyWith({
+    List<Todo>? todos,
+    List<Todo>? allTodos,
+    TodoFilter? filter,
+    TodoSort? sort,
+    String? actionMessage,
+    bool clearActionMessage = false,
+  }) {
+    return TodosLoaded(
+      todos: todos ?? this.todos,
+      allTodos: allTodos ?? this.allTodos,
+      filter: filter ?? this.filter,
+      sort: sort ?? this.sort,
+      actionMessage:
+          clearActionMessage ? null : actionMessage ?? this.actionMessage,
+    );
+  }
 
   @override
-  List<Object?> get props => [todos, filter, sort, allTodos];
+  List<Object?> get props => [todos, filter, sort, allTodos, actionMessage];
 }
 
 final class TodosEmpty extends TodosState {

@@ -208,4 +208,55 @@ void main() {
           .having((s) => s.filter, 'filter', TodoFilter.active),
     ],
   );
+
+  blocTest<TodosBloc, TodosState>(
+    'delete failure keeps list and sets actionMessage',
+    build: () {
+      when(() => getTodos()).thenAnswer((_) async => buildTodoList());
+      when(() => deleteTodo(any()))
+          .thenThrow(const ServerFailure('delete failed'));
+      return buildBloc();
+    },
+    act: (bloc) async {
+      bloc.add(const TodosLoadRequested());
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const TodosDeleteRequested('todo-1'));
+    },
+    expect: () => [
+      isA<TodosLoading>(),
+      isA<TodosLoaded>(),
+      isA<TodosLoaded>().having(
+        (s) => s.actionMessage,
+        'actionMessage',
+        'delete failed',
+      ),
+    ],
+  );
+
+  blocTest<TodosBloc, TodosState>(
+    'clear action message resets snackbar payload',
+    build: () {
+      when(() => getTodos()).thenAnswer((_) async => buildTodoList());
+      when(() => deleteTodo(any()))
+          .thenThrow(const ServerFailure('delete failed'));
+      return buildBloc();
+    },
+    act: (bloc) async {
+      bloc.add(const TodosLoadRequested());
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const TodosDeleteRequested('todo-1'));
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const TodosActionMessageCleared());
+    },
+    expect: () => [
+      isA<TodosLoading>(),
+      isA<TodosLoaded>(),
+      isA<TodosLoaded>().having(
+        (s) => s.actionMessage,
+        'actionMessage',
+        'delete failed',
+      ),
+      isA<TodosLoaded>().having((s) => s.actionMessage, 'cleared', isNull),
+    ],
+  );
 }

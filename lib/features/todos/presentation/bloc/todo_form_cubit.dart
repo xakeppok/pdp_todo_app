@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_priority.dart';
@@ -14,20 +13,20 @@ class TodoFormCubit extends Cubit<TodoFormState> {
     required this._updateTodo,
     Todo? initialTodo,
     String Function()? idGenerator,
-  })  : _initialTodo = initialTodo,
-        _idGenerator = idGenerator ?? _defaultId,
-        super(
-          TodoFormState(
-            title: initialTodo?.title ?? '',
-            description: initialTodo?.description ?? '',
-            priority: initialTodo?.priority ?? TodoPriority.medium,
-            dueDateInput: initialTodo == null
-                ? ''
-                : _formatDate(initialTodo.dueDate),
-            tagsInput: initialTodo?.tags.join(', ') ?? '',
-            isEditing: initialTodo != null,
-          ),
-        );
+  }) : _initialTodo = initialTodo,
+       _idGenerator = idGenerator ?? _defaultId,
+       super(
+         TodoFormState(
+           title: initialTodo?.title ?? '',
+           description: initialTodo?.description ?? '',
+           priority: initialTodo?.priority ?? TodoPriority.medium,
+           dueDateInput: initialTodo == null
+               ? ''
+               : _formatDate(initialTodo.dueDate),
+           tagsInput: initialTodo?.tags.join(', ') ?? '',
+           isEditing: initialTodo != null,
+         ),
+       );
 
   final CreateTodo _createTodo;
   final UpdateTodo _updateTodo;
@@ -121,8 +120,7 @@ class TodoFormCubit extends Cubit<TodoFormState> {
     return {};
   }
 
-  static String _defaultId() =>
-      'todo-${DateTime.now().microsecondsSinceEpoch}';
+  static String _defaultId() => 'todo-${DateTime.now().microsecondsSinceEpoch}';
 
   static String _formatDate(DateTime date) {
     final month = date.month.toString().padLeft(2, '0');
@@ -181,25 +179,27 @@ class TodoFormState extends Equatable {
       tagsInput: tagsInput ?? this.tagsInput,
       isEditing: isEditing ?? this.isEditing,
       status: status ?? this.status,
-      fieldErrors:
-          clearFieldErrors ? const {} : fieldErrors ?? this.fieldErrors,
-      errorMessage:
-          clearErrorMessage ? null : errorMessage ?? this.errorMessage,
+      fieldErrors: clearFieldErrors
+          ? const {}
+          : fieldErrors ?? this.fieldErrors,
+      errorMessage: clearErrorMessage
+          ? null
+          : errorMessage ?? this.errorMessage,
       savedTodo: clearSuccess ? null : savedTodo ?? this.savedTodo,
     );
   }
 
   @override
   List<Object?> get props => [
-        title,
-        description,
-        priority,
-        dueDateInput,
-        tagsInput,
-        isEditing,
-        status,
-        fieldErrors,
-        errorMessage,
-        savedTodo,
-      ];
+    title,
+    description,
+    priority,
+    dueDateInput,
+    tagsInput,
+    isEditing,
+    status,
+    fieldErrors,
+    errorMessage,
+    savedTodo,
+  ];
 }
