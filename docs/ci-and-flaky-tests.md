@@ -21,11 +21,40 @@ Runs on an **Android emulator** via `android-emulator-runner`.
 
 Local `flutter test integration_test/ -d macos` can smoke-test flows but is **not** CI parity (Android is the supported integration target).
 
+## Local commit hooks (Lefthook)
+
+`lefthook.yml` mirrors the CI `test` job on every commit (without coverage upload). Hooks are **not** active until you install them in the clone.
+
+### Init (required once per clone)
+
+```bash
+brew install lefthook   # or: https://lefthook.dev
+lefthook install        # writes .git/hooks/pre-commit
+```
+
+`assert_lefthook_installed: true` fails the commit if Lefthook is missing from `PATH` after hooks were installed.
+
+What runs:
+
+1. `flutter analyze --fatal-infos`
+2. `flutter test test/` on Linux; on macOS/Windows, `flutter test --exclude-tags golden test/` (goldens are Linux/CI images)
+
+Android integration tests are **not** in the hook (emulator-only, CI job).
+
+### Skip / override
+
+```bash
+LEFTHOOK=0 git commit -m "..."   # skip hooks once
+lefthook run pre-commit          # run manually
+```
+
+Optional gitignored `lefthook-local.yml` for machine-specific tweaks.
+
 ## Goldens
 
 Generate / update / review: [goldens.md](goldens.md).
 
-Short version: update on **Linux** to match the `test` job; never pass `--update-goldens` in CI.
+Short version: update on **Linux** (manual **Update goldens** workflow or local Linux) to match the `test` job; never pass `--update-goldens` in the regular CI `test` job.
 
 ## Deterministic fixtures
 

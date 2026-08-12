@@ -21,7 +21,6 @@ class TodoApp extends StatefulWidget {
   final TodosBloc? todosBloc;
   final ThemeCubit? themeCubit;
 
-  /// Initial [ThemeMode] when [themeCubit] is not provided.
   final ThemeMode themeMode;
 
   @override

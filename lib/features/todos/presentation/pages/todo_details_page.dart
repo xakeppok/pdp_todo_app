@@ -10,7 +10,6 @@ import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
 import 'package:pdp_todo_app/features/todos/presentation/widgets/todo_list_item.dart';
 
-/// Presentation-only details page. Orchestration lives in [TodoDetailsCubit].
 class TodoDetailsPage extends StatelessWidget {
   const TodoDetailsPage({
     required this.clock, super.key,

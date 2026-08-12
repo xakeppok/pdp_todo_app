@@ -6,7 +6,6 @@ enum FailureMode {
   throwOnWrite,
 }
 
-/// Abstract data source. Implementations may be fakes or (in real apps) remote.
 abstract class TodoDataSource {
   FailureMode get failureMode;
   set failureMode(FailureMode value);

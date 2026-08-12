@@ -13,7 +13,6 @@ import 'package:pdp_todo_app/features/todos/presentation/pages/todos_page.dart';
 typedef TodoFormCubitFactory = TodoFormCubit Function({Todo? initialTodo});
 typedef TodoDetailsCubitFactory = TodoDetailsCubit Function(String todoId);
 
-/// Router depends on presentation factories only — no getIt, no use-case types.
 GoRouter createAppRouter({
   required Clock clock,
   required TodoFormCubitFactory createFormCubit,

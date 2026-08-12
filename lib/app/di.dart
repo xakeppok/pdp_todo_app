@@ -26,7 +26,6 @@ import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 
 final GetIt getIt = GetIt.instance;
 
-/// Composition root only. Domain/data/presentation use constructor injection.
 Future<void> configureDependencies({
   Clock? clock,
   TodoDataSource? dataSource,
@@ -91,7 +90,6 @@ TodoDetailsCubit createTodoDetailsCubit(String todoId) {
   return cubit;
 }
 
-/// Builds the app router from registered dependencies (composition root).
 GoRouter createConfiguredRouter({String initialLocation = AppRoutes.todos}) {
   return createAppRouter(
     clock: getIt<Clock>(),

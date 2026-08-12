@@ -1,0 +1,40 @@
+name: Update goldens
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-goldens:
+    name: Regenerate and commit goldens
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.9"
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Update goldens
+        run: flutter test --update-goldens test/golden
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add test/golden/goldens/
+          if git diff --staged --quiet; then
+            echo "No golden PNG changes"
+            exit 0
+          fi
+          git commit -m "chore: update golden images"
+          git push origin "HEAD:${{ github.ref_name }}"

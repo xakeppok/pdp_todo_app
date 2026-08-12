@@ -1,0 +1,14 @@
+assert_lefthook_installed: true
+
+pre-commit:
+  parallel: false
+  commands:
+    analyze:
+      run: flutter analyze --fatal-infos
+    test:
+      run: |
+        if [ "$(uname -s)" = Linux ]; then
+          flutter test test/
+        else
+          flutter test --exclude-tags golden test/
+        fi

@@ -6,7 +6,6 @@ import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.da
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 
-/// Test-only bootstrap. Configures FailureMode without private DS fields.
 class IntegrationHarness {
   IntegrationHarness._();
 

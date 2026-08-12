@@ -23,8 +23,6 @@ class Todo extends Equatable {
   final bool completed;
   final List<String> tags;
 
-  /// Date-only overdue: compares year/month/day only.
-  /// Due today is never overdue, regardless of time of day.
   bool isOverdue(Clock clock) {
     if (completed) return false;
     final today = _dateOnly(clock.now());
@@ -32,7 +30,6 @@ class Todo extends Equatable {
     return due.isBefore(today);
   }
 
-  /// Completing an already-completed todo is a domain error.
   Todo complete() {
     if (completed) {
       throw const DomainFailure('Todo is already completed');
