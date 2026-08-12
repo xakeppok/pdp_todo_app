@@ -1,0 +1,14 @@
+# Strict analysis for this Flutter testing reference app.
+# https://pub.dev/packages/very_good_analysis
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    # Demo / reference app: public API docs would dominate noise without teaching value.
+    public_member_api_docs: false
