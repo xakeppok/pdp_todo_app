@@ -1,19 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pdp_todo_app/features/messages/data/datasources/messages_platform_data_source.dart';
+import 'package:pdp_todo_app/features/messages/data/datasources/messages_data_source.dart';
 import 'package:pdp_todo_app/features/messages/data/repositories/messages_repository_impl.dart';
 import 'package:pdp_todo_app/features/messages/domain/entities/channel_message.dart';
 import 'package:pdp_todo_app/features/messages/domain/usecases/send_ping.dart';
 
-class MockMessagesPlatformDataSource extends Mock
-    implements MessagesPlatformDataSource {}
+class MockMessagesDataSource extends Mock implements MessagesDataSource {}
 
 void main() {
-  late MockMessagesPlatformDataSource dataSource;
+  late MockMessagesDataSource dataSource;
   late MessagesRepositoryImpl repository;
 
   setUp(() {
-    dataSource = MockMessagesPlatformDataSource();
+    dataSource = MockMessagesDataSource();
     repository = MessagesRepositoryImpl(dataSource);
   });
 

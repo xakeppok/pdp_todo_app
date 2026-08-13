@@ -1,7 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
+import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_data_source.dart';
 
-class ConnectivityPlatformDataSource {
+class ConnectivityPlatformDataSource implements ConnectivityDataSource {
   ConnectivityPlatformDataSource({
     this._channel = const EventChannel(channelName),
   });
@@ -11,6 +12,7 @@ class ConnectivityPlatformDataSource {
 
   final EventChannel _channel;
 
+  @override
   Stream<String> get connectivity {
     return _channel
         .receiveBroadcastStream()

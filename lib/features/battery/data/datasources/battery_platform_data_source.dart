@@ -1,7 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
+import 'package:pdp_todo_app/features/battery/data/datasources/battery_data_source.dart';
 
-class BatteryPlatformDataSource {
+class BatteryPlatformDataSource implements BatteryDataSource {
   BatteryPlatformDataSource({
     this._channel = const MethodChannel(channelName),
   });
@@ -11,6 +12,7 @@ class BatteryPlatformDataSource {
 
   final MethodChannel _channel;
 
+  @override
   Future<int> getBatteryLevel() async {
     try {
       final batteryLevel = await _channel.invokeMethod<Object?>(

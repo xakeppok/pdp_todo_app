@@ -3,14 +3,23 @@ package com.example.pdp_todo_app
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import com.example.pdp_todo_app.native.BatteryChannel
+import com.example.pdp_todo_app.native.BatteryPigeonApi
 import com.example.pdp_todo_app.native.ConnectivityChannel
+import com.example.pdp_todo_app.native.ConnectivityPigeonStreamHandler
 import com.example.pdp_todo_app.native.MessagesChannel
+import com.example.pdp_todo_app.native.MessagesPigeonApi
+import com.example.pdp_todo_app.pigeon.BatteryHostApi
+import com.example.pdp_todo_app.pigeon.ConnectivityEventsStreamHandler
+import com.example.pdp_todo_app.pigeon.MessagesHostApi
 
 class MainActivity : FlutterActivity() {
 
     private lateinit var batteryChannel: BatteryChannel
     private lateinit var connectivityChannel: ConnectivityChannel
     private lateinit var messagesChannel: MessagesChannel
+    private lateinit var batteryPigeonApi: BatteryPigeonApi
+    private lateinit var messagesPigeonApi: MessagesPigeonApi
+    private lateinit var connectivityPigeonStreamHandler: ConnectivityPigeonStreamHandler
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -25,5 +34,15 @@ class MainActivity : FlutterActivity() {
             messenger = messenger
         )
         messagesChannel = MessagesChannel(messenger = messenger)
+
+        batteryPigeonApi = BatteryPigeonApi(context = this)
+        BatteryHostApi.setUp(messenger, batteryPigeonApi)
+        messagesPigeonApi = MessagesPigeonApi()
+        MessagesHostApi.setUp(messenger, messagesPigeonApi)
+        connectivityPigeonStreamHandler = ConnectivityPigeonStreamHandler(context = this)
+        ConnectivityEventsStreamHandler.register(
+            messenger,
+            connectivityPigeonStreamHandler
+        )
     }
 }

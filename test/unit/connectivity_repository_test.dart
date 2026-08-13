@@ -1,20 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
-import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_platform_datasource.dart';
+import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_data_source.dart';
 import 'package:pdp_todo_app/features/connectivity/data/repositories/connectivity_repository_impl.dart';
 import 'package:pdp_todo_app/features/connectivity/domain/entities/connectivity_status.dart';
 import 'package:pdp_todo_app/features/connectivity/domain/usecases/watch_connectivity.dart';
 
-class MockConnectivityPlatformDataSource extends Mock
-    implements ConnectivityPlatformDataSource {}
+class MockConnectivityDataSource extends Mock
+    implements ConnectivityDataSource {}
 
 void main() {
-  late MockConnectivityPlatformDataSource dataSource;
+  late MockConnectivityDataSource dataSource;
   late ConnectivityRepositoryImpl repository;
 
   setUp(() {
-    dataSource = MockConnectivityPlatformDataSource();
+    dataSource = MockConnectivityDataSource();
     repository = ConnectivityRepositoryImpl(dataSource);
   });
 

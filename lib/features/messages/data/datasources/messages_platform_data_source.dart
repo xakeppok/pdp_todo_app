@@ -1,7 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
+import 'package:pdp_todo_app/features/messages/data/datasources/messages_data_source.dart';
 
-class MessagesPlatformDataSource {
+class MessagesPlatformDataSource implements MessagesDataSource {
   MessagesPlatformDataSource({
     BasicMessageChannel<Object?>? channel,
   }) : _channel =
@@ -15,6 +16,7 @@ class MessagesPlatformDataSource {
 
   final BasicMessageChannel<Object?> _channel;
 
+  @override
   Future<Map<String, Object?>> sendPing({
     required String id,
     required String payload,
