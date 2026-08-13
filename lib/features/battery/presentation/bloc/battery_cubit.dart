@@ -24,7 +24,9 @@ class BatteryCubit extends Cubit<BatteryState> {
   }
 
   Future<void> getBatteryLevel() async {
-    emit(const BatteryLoading());
+    if (state is! BatteryLoaded) {
+      emit(const BatteryLoading());
+    }
     try {
       final batteryLevel = await _getBatteryLevel();
       emit(BatteryLoaded(batteryLevel));

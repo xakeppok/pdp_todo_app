@@ -5,6 +5,7 @@ import UIKit
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
     private var batteryChannel: BatteryChannel?
     private var connectivityChannel: ConnectivityChannel?
+    private var messagesChannel: MessagesChannel?
     
     override func application(
         _ application: UIApplication,
@@ -19,6 +20,6 @@ import UIKit
         let messenger = engineBridge.applicationRegistrar.messenger()
         batteryChannel = BatteryChannel(messenger: messenger)
         connectivityChannel = ConnectivityChannel(messenger: messenger)
+        messagesChannel = MessagesChannel(messenger: messenger)
     }
 }
-

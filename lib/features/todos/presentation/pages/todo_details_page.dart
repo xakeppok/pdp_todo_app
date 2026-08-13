@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
+import 'package:pdp_todo_app/core/widgets/snack_bar_listener.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todo_details_cubit.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
@@ -21,24 +22,21 @@ class TodoDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
+        SnackBarListener<TodoDetailsCubit, TodoDetailsState>(
+          messageOf: (state) =>
+              state is TodoDetailsLoaded ? state.actionMessage : null,
+          onShown: (context, _) {
+            context.read<TodoDetailsCubit>().clearActionMessage();
+          },
+        ),
         BlocListener<TodoDetailsCubit, TodoDetailsState>(
-          listenWhen: (previous, current) =>
-              current is TodoDetailsDeleted ||
-              (current is TodoDetailsLoaded && current.actionMessage != null),
+          listenWhen: (_, current) => current is TodoDetailsDeleted,
           listener: (context, state) {
-            if (state is TodoDetailsDeleted) {
-              context.read<TodosBloc>().add(TodosItemRemoved(state.id));
-              context.go(AppRoutes.todos);
+            if (state is! TodoDetailsDeleted) {
               return;
             }
-            if (state is TodoDetailsLoaded && state.actionMessage != null) {
-              ScaffoldMessenger.of(context)
-                ..clearSnackBars()
-                ..showSnackBar(
-                  SnackBar(content: Text(state.actionMessage!)),
-                );
-              context.read<TodoDetailsCubit>().clearActionMessage();
-            }
+            context.read<TodosBloc>().add(TodosItemRemoved(state.id));
+            context.go(AppRoutes.todos);
           },
         ),
         BlocListener<TodoDetailsCubit, TodoDetailsState>(

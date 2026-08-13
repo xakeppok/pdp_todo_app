@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pdp_todo_app/core/widgets/fade_switcher.dart';
+import 'package:pdp_todo_app/core/widgets/snack_bar_listener.dart';
 import 'package:pdp_todo_app/features/connectivity/domain/entities/connectivity_status.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_state.dart';
@@ -9,23 +11,11 @@ class ConnectivityWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ConnectivityCubit, ConnectivityState>(
-      listenWhen: (previous, current) => current is ConnectivityError,
-      listener: (context, state) {
-        if (state is ConnectivityError) {
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(
-              SnackBar(content: Text(state.error)),
-            );
-        }
-      },
+    return SnackBarListener<ConnectivityCubit, ConnectivityState>(
+      messageOf: (state) => state is ConnectivityError ? state.error : null,
       child: BlocBuilder<ConnectivityCubit, ConnectivityState>(
         builder: (context, state) {
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
-            switchInCurve: Curves.easeOut,
-            switchOutCurve: Curves.easeIn,
+          return FadeSwitcher(
             child: switch (state) {
               ConnectivityInitial() ||
               ConnectivityLoading() => const _ConnectivityCard(

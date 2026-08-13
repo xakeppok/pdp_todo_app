@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdp_todo_app/app/di.dart';
+import 'package:pdp_todo_app/core/widgets/snack_bar_listener.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
 
@@ -34,11 +35,7 @@ class _FailureModeToggleButtonState extends State<FailureModeToggleButton> {
     setDataSourceFailureMode(next);
     setState(() => _mode = next);
 
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(content: Text('FailureMode: ${next.name}')),
-      );
+    context.showSnackBarMessage('FailureMode: ${next.name}');
   }
 
   @override

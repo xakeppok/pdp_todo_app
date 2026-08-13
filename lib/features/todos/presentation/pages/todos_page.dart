@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pdp_todo_app/app/widgets/battery_widget.dart';
-import 'package:pdp_todo_app/app/widgets/connectivity_widget.dart';
-import 'package:pdp_todo_app/app/widgets/failure_mode_toggle_button.dart';
 import 'package:pdp_todo_app/app/widgets/theme_toggle_button.dart';
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
+import 'package:pdp_todo_app/core/widgets/snack_bar_listener.dart';
+import 'package:pdp_todo_app/features/battery/presentation/widgets/battery_widget.dart';
+import 'package:pdp_todo_app/features/connectivity/presentation/widgets/connectivity_widget.dart';
+import 'package:pdp_todo_app/features/messages/presentation/messages_keys.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
+import 'package:pdp_todo_app/features/todos/presentation/widgets/failure_mode_toggle_button.dart';
 import 'package:pdp_todo_app/features/todos/presentation/widgets/todo_filter_bar.dart';
 import 'package:pdp_todo_app/features/todos/presentation/widgets/todo_list_item.dart';
 import 'package:pdp_todo_app/features/todos/presentation/widgets/todo_sort_menu.dart';
@@ -23,24 +25,22 @@ class TodosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<TodosBloc, TodosState>(
-      listenWhen: (previous, current) =>
-          current is TodosLoaded && current.actionMessage != null,
-      listener: (context, state) {
-        if (state is TodosLoaded && state.actionMessage != null) {
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(
-              SnackBar(content: Text(state.actionMessage!)),
-            );
-          context.read<TodosBloc>().add(const TodosActionMessageCleared());
-        }
+    return SnackBarListener<TodosBloc, TodosState>(
+      messageOf: (state) => state is TodosLoaded ? state.actionMessage : null,
+      onShown: (context, _) {
+        context.read<TodosBloc>().add(const TodosActionMessageCleared());
       },
       child: Scaffold(
         key: TodosKeys.page,
         appBar: AppBar(
           title: const Text('Todos'),
           actions: [
+            IconButton(
+              key: MessagesKeys.openButton,
+              tooltip: 'Messages channel',
+              onPressed: () => context.push(AppRoutes.messages),
+              icon: const Icon(Icons.sync_alt_rounded),
+            ),
             const FailureModeToggleButton(),
             const ThemeToggleButton(),
             BlocBuilder<TodosBloc, TodosState>(

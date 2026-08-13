@@ -6,6 +6,7 @@ import 'package:pdp_todo_app/app/theme_cubit.dart';
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
+import 'package:pdp_todo_app/features/messages/presentation/messages_keys.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_filter.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_sort.dart';
@@ -245,6 +246,24 @@ void main() {
     await tester.tap(find.byKey(TodosKeys.createFab));
     await tester.pumpAndSettle();
     expect(navigated, AppRoutes.create);
+  });
+
+  testWidgets('messages button opens messages route', (tester) async {
+    String? navigated;
+    when(() => getTodos()).thenAnswer((_) async => buildTodoList());
+    final bloc = createBloc()..add(const TodosLoadRequested());
+    await pumpTodosPage(
+      tester,
+      bloc: bloc,
+      clock: clock,
+      onNavigate: (location) => navigated = location,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(MessagesKeys.openButton));
+    await tester.pumpAndSettle();
+    expect(navigated, AppRoutes.messages);
+    expect(find.byKey(MessagesKeys.page), findsOneWidget);
   });
 
   testWidgets('dark theme smoke on list', (tester) async {

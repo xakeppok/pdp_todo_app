@@ -41,6 +41,19 @@ void main() {
   );
 
   blocTest<BatteryCubit, BatteryState>(
+    'refresh from loaded does not emit loading',
+    build: () => BatteryCubit(getBatteryLevel),
+    seed: () => const BatteryLoaded(42),
+    setUp: () {
+      when(() => getBatteryLevel()).thenAnswer((_) async => 18);
+    },
+    act: (cubit) => cubit.getBatteryLevel(),
+    expect: () => const [
+      BatteryLoaded(18),
+    ],
+  );
+
+  blocTest<BatteryCubit, BatteryState>(
     'emits loading then error on PlatformFailure',
     build: () => BatteryCubit(getBatteryLevel),
     setUp: () {
@@ -130,7 +143,6 @@ void main() {
     },
     act: (cubit) => cubit.handleAppLifecycle(AppLifecycleState.resumed),
     expect: () => const [
-      BatteryLoading(),
       BatteryLoaded(18),
     ],
   );

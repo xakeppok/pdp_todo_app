@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pdp_todo_app/core/widgets/fade_switcher.dart';
+import 'package:pdp_todo_app/core/widgets/snack_bar_listener.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_state.dart';
 
@@ -36,23 +38,11 @@ class _BatteryWidgetState extends State<BatteryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BatteryCubit, BatteryState>(
-      listenWhen: (previous, current) => current is BatteryError,
-      listener: (context, state) {
-        if (state is BatteryError) {
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(
-              SnackBar(content: Text(state.error)),
-            );
-        }
-      },
+    return SnackBarListener<BatteryCubit, BatteryState>(
+      messageOf: (state) => state is BatteryError ? state.error : null,
       child: BlocBuilder<BatteryCubit, BatteryState>(
         builder: (context, state) {
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
-            switchInCurve: Curves.easeOut,
-            switchOutCurve: Curves.easeIn,
+          return FadeSwitcher(
             child: switch (state) {
               BatteryInitial() || BatteryLoading() => const _BatteryCard(
                 key: ValueKey('loading'),

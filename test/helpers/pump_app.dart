@@ -13,6 +13,9 @@ import 'package:pdp_todo_app/features/connectivity/domain/entities/connectivity_
 import 'package:pdp_todo_app/features/connectivity/domain/usecases/watch_connectivity.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_state.dart';
+import 'package:pdp_todo_app/features/messages/domain/usecases/send_ping.dart';
+import 'package:pdp_todo_app/features/messages/presentation/bloc/messages_cubit.dart';
+import 'package:pdp_todo_app/features/messages/presentation/messages_keys.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/repositories/todo_repository.dart';
 import 'package:pdp_todo_app/features/todos/domain/services/todo_query.dart';
@@ -41,6 +44,8 @@ class MockUpdateTodo extends Mock implements UpdateTodo {}
 class MockGetBatteryLevel extends Mock implements GetBatteryLevel {}
 
 class MockWatchConnectivity extends Mock implements WatchConnectivity {}
+
+class MockSendPing extends Mock implements SendPing {}
 
 class FakeTodo extends Fake implements Todo {}
 
@@ -88,6 +93,18 @@ Future<ConnectivityCubit> buildLoadedConnectivityCubit({
   return cubit;
 }
 
+MessagesCubit buildMessagesCubit() {
+  final sendPing = MockSendPing();
+  when(
+    () => sendPing(
+      id: any(named: 'id'),
+      payload: any(named: 'payload'),
+    ),
+  ).thenAnswer(
+    (invocation) async => throw StateError('sendPing not stubbed'),
+  );
+  return MessagesCubit(sendPing: sendPing);
+}
 Future<void> pumpTodosPage(
   WidgetTester tester, {
   required TodosBloc bloc,
@@ -95,6 +112,7 @@ Future<void> pumpTodosPage(
   ThemeCubit? themeCubit,
   BatteryCubit? batteryCubit,
   ConnectivityCubit? connectivityCubit,
+  MessagesCubit? messagesCubit,
   ThemeMode themeMode = ThemeMode.light,
   Size surfaceSize = const Size(390, 844),
   void Function(String location)? onNavigate,
@@ -116,6 +134,11 @@ Future<void> pumpTodosPage(
       connectivityCubit ?? await buildLoadedConnectivityCubit();
   if (connectivityCubit == null) {
     addTearDown(resolvedConnectivityCubit.close);
+  }
+
+  final resolvedMessagesCubit = messagesCubit ?? buildMessagesCubit();
+  if (messagesCubit == null) {
+    addTearDown(resolvedMessagesCubit.close);
   }
 
   final router = GoRouter(
@@ -150,6 +173,16 @@ Future<void> pumpTodosPage(
           ),
         ],
       ),
+      GoRoute(
+        path: AppRoutes.messages,
+        builder: (context, state) {
+          onNavigate?.call(AppRoutes.messages);
+          return const Scaffold(
+            key: MessagesKeys.page,
+            body: Text('Messages stub'),
+          );
+        },
+      ),
     ],
   );
 
@@ -160,6 +193,7 @@ Future<void> pumpTodosPage(
         BlocProvider.value(value: resolvedThemeCubit),
         BlocProvider.value(value: resolvedBatteryCubit),
         BlocProvider.value(value: resolvedConnectivityCubit),
+        BlocProvider.value(value: resolvedMessagesCubit),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, mode) {

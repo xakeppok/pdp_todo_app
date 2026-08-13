@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
+import 'package:pdp_todo_app/features/messages/presentation/pages/messages_page.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todo_details_cubit.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todo_form_cubit.dart';
@@ -67,6 +68,10 @@ GoRouter createAppRouter({
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.messages,
+        builder: (context, state) => const MessagesPage(),
       ),
     ],
   );

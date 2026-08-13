@@ -8,6 +8,7 @@ import 'package:pdp_todo_app/app/theme.dart';
 import 'package:pdp_todo_app/app/theme_cubit.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
+import 'package:pdp_todo_app/features/messages/presentation/bloc/messages_cubit.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 
 class TodoApp extends StatefulWidget {
@@ -74,6 +75,9 @@ class _TodoAppState extends State<TodoApp> {
         ),
         BlocProvider(
           create: (_) => getIt<ConnectivityCubit>()..watch(),
+        ),
+        BlocProvider(
+          create: (_) => getIt<MessagesCubit>(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(

@@ -15,6 +15,11 @@ import 'package:pdp_todo_app/features/connectivity/data/repositories/connectivit
 import 'package:pdp_todo_app/features/connectivity/domain/repositories/connectivity_repository.dart';
 import 'package:pdp_todo_app/features/connectivity/domain/usecases/watch_connectivity.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
+import 'package:pdp_todo_app/features/messages/data/datasources/messages_platform_data_source.dart';
+import 'package:pdp_todo_app/features/messages/data/repositories/messages_repository_impl.dart';
+import 'package:pdp_todo_app/features/messages/domain/repositories/messages_repository.dart';
+import 'package:pdp_todo_app/features/messages/domain/usecases/send_ping.dart';
+import 'package:pdp_todo_app/features/messages/presentation/bloc/messages_cubit.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/in_memory_todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
@@ -82,6 +87,14 @@ Future<void> configureDependencies({
     )
     ..registerLazySingleton(
       () => ConnectivityCubit(getIt<WatchConnectivity>()),
+    )
+    ..registerLazySingleton(MessagesPlatformDataSource.new)
+    ..registerLazySingleton<MessagesRepository>(
+      () => MessagesRepositoryImpl(getIt()),
+    )
+    ..registerLazySingleton(() => SendPing(getIt<MessagesRepository>()))
+    ..registerLazySingleton(
+      () => MessagesCubit(sendPing: getIt()),
     );
 }
 

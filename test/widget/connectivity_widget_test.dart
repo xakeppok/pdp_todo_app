@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pdp_todo_app/app/widgets/connectivity_widget.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/features/connectivity/domain/entities/connectivity_status.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_state.dart';
+import 'package:pdp_todo_app/features/connectivity/presentation/widgets/connectivity_widget.dart';
 
 import '../helpers/pump_app.dart';
 
@@ -84,6 +84,33 @@ void main() {
 
     expect(find.text('Connectivity unavailable'), findsOneWidget);
     expect(find.text('Tap to retry'), findsOneWidget);
+  });
+
+  testWidgets('retrying error mid-animation does not throw duplicate keys', (
+    tester,
+  ) async {
+    final controller = StreamController<ConnectivityStatus>.broadcast();
+    addTearDown(controller.close);
+    when(watchConnectivity.call).thenAnswer((_) => controller.stream);
+
+    cubit = ConnectivityCubit(watchConnectivity);
+    addTearDown(cubit.close);
+
+    cubit.watch();
+    controller.addError(
+      const PlatformFailure('Connectivity not available.'),
+    );
+    await cubit.stream.firstWhere((state) => state is ConnectivityError);
+    await pumpConnectivity(tester);
+
+    cubit.watch();
+    await tester.pump();
+    controller.addError(
+      const PlatformFailure('Connectivity not available.'),
+    );
+    await tester.pump();
+
+    expect(find.text('Connectivity unavailable'), findsOneWidget);
   });
 
   testWidgets('updates when a new status is emitted', (tester) async {
