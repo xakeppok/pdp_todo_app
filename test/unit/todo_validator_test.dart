@@ -37,13 +37,15 @@ void main() {
     expect(result.title, 'Ship tests');
   });
 
-  test('rejects invalid calendar date components before DateTime construction',
-      () {
-    expect(
-      () => validator.parseDateOnly('2026-02-30'),
-      throwsA(isA<ValidationFailure>()),
-    );
-  });
+  test(
+    'rejects invalid calendar date components before DateTime construction',
+    () {
+      expect(
+        () => validator.parseDateOnly('2026-02-30'),
+        throwsA(isA<ValidationFailure>()),
+      );
+    },
+  );
 
   test('accepts a valid date-only input', () {
     final date = validator.parseDateOnly('2026-02-28');

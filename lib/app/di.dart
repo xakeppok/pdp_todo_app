@@ -10,6 +10,11 @@ import 'package:pdp_todo_app/features/battery/data/repositories/battery_reposito
 import 'package:pdp_todo_app/features/battery/domain/repositories/battery_repository.dart';
 import 'package:pdp_todo_app/features/battery/domain/usecases/get_battery_level.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
+import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_platform_datasource.dart';
+import 'package:pdp_todo_app/features/connectivity/data/repositories/connectivity_repository_impl.dart';
+import 'package:pdp_todo_app/features/connectivity/domain/repositories/connectivity_repository.dart';
+import 'package:pdp_todo_app/features/connectivity/domain/usecases/watch_connectivity.dart';
+import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/in_memory_todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
@@ -67,7 +72,17 @@ Future<void> configureDependencies({
       () => BatteryRepositoryImpl(getIt()),
     )
     ..registerLazySingleton(() => GetBatteryLevel(getIt<BatteryRepository>()))
-    ..registerLazySingleton(() => BatteryCubit(getIt()));
+    ..registerLazySingleton(() => BatteryCubit(getIt()))
+    ..registerLazySingleton(ConnectivityPlatformDataSource.new)
+    ..registerLazySingleton<ConnectivityRepository>(
+      () => ConnectivityRepositoryImpl(getIt()),
+    )
+    ..registerLazySingleton(
+      () => WatchConnectivity(getIt<ConnectivityRepository>()),
+    )
+    ..registerLazySingleton(
+      () => ConnectivityCubit(getIt<WatchConnectivity>()),
+    );
 }
 
 TodosBloc createTodosBloc() {

@@ -3,6 +3,9 @@ import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+    private var batteryChannel: BatteryChannel?
+    private var connectivityChannel: ConnectivityChannel?
+    
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -13,31 +16,9 @@ import UIKit
     
     func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
         GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-        let batteryChannel = FlutterMethodChannel(
-            name: "pdp.flutter.app/battery",
-            binaryMessenger: engineBridge.applicationRegistrar.messenger()
-        )
-        
-        batteryChannel.setMethodCallHandler { call, result in
-            
-            if call.method == "getBatteryLevel" {
-                UIDevice.current.isBatteryMonitoringEnabled = true
-                
-                let batteryLevel = UIDevice.current.batteryLevel
-                if batteryLevel >= 0 {
-                    result(Int(batteryLevel * 100))
-                } else {
-                    result(
-                        FlutterError(
-                            code: "UNAVAILABLE",
-                            message: "Battery level not available.",
-                            details: nil
-                        )
-                    )
-                }
-            } else {
-                result(FlutterMethodNotImplemented)
-            }
-        }
+        let messenger = engineBridge.applicationRegistrar.messenger()
+        batteryChannel = BatteryChannel(messenger: messenger)
+        connectivityChannel = ConnectivityChannel(messenger: messenger)
     }
 }
+

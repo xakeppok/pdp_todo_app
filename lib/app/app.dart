@@ -7,6 +7,7 @@ import 'package:pdp_todo_app/app/di.dart';
 import 'package:pdp_todo_app/app/theme.dart';
 import 'package:pdp_todo_app/app/theme_cubit.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
+import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 
 class TodoApp extends StatefulWidget {
@@ -70,6 +71,9 @@ class _TodoAppState extends State<TodoApp> {
             unawaited(batteryCubit.getBatteryLevel());
             return batteryCubit;
           },
+        ),
+        BlocProvider(
+          create: (_) => getIt<ConnectivityCubit>()..watch(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(

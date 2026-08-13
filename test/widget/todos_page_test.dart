@@ -36,11 +36,11 @@ void main() {
   });
 
   TodosBloc createBloc() => buildTodosBloc(
-        getTodos: getTodos,
-        deleteTodo: deleteTodo,
-        toggleTodoCompletion: toggleTodoCompletion,
-        clock: clock,
-      );
+    getTodos: getTodos,
+    deleteTodo: deleteTodo,
+    toggleTodoCompletion: toggleTodoCompletion,
+    clock: clock,
+  );
 
   testWidgets('shows loading view', (tester) async {
     when(() => getTodos()).thenAnswer(
@@ -127,13 +127,15 @@ void main() {
     await tester.tap(find.byKey(TodosKeys.sort(TodoSort.priority)));
     await tester.pumpAndSettle();
 
-    final titles = tester.widgetList<Text>(find.byWidgetPredicate(
-      (widget) =>
-          widget is Text &&
-          (widget.data == 'Write unit tests' ||
-              widget.data == 'Add widget tests' ||
-              widget.data == 'Document CI'),
-    ));
+    final titles = tester.widgetList<Text>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            (widget.data == 'Write unit tests' ||
+                widget.data == 'Add widget tests' ||
+                widget.data == 'Document CI'),
+      ),
+    );
     expect(titles.first.data, 'Write unit tests');
   });
 
@@ -156,8 +158,9 @@ void main() {
     expect(find.text('Title cannot be empty'), findsOneWidget);
   });
 
-  testWidgets('create form shows invalid due-date validation error',
-      (tester) async {
+  testWidgets('create form shows invalid due-date validation error', (
+    tester,
+  ) async {
     final repository = MockTodoRepository();
     await tester.pumpWidget(
       MaterialApp(

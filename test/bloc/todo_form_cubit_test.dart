@@ -38,8 +38,11 @@ void main() {
     expect: () => [
       isA<TodoFormState>().having((s) => s.title, 'title', ''),
       isA<TodoFormState>().having((s) => s.dueDateInput, 'due', '2026-02-30'),
-      isA<TodoFormState>()
-          .having((s) => s.status, 'status', TodoFormStatus.submitting),
+      isA<TodoFormState>().having(
+        (s) => s.status,
+        'status',
+        TodoFormStatus.submitting,
+      ),
       isA<TodoFormState>()
           .having((s) => s.status, 'status', TodoFormStatus.failure)
           .having((s) => s.fieldErrors.isNotEmpty, 'field errors', isTrue),
@@ -73,8 +76,11 @@ void main() {
     expect: () => [
       isA<TodoFormState>(),
       isA<TodoFormState>(),
-      isA<TodoFormState>()
-          .having((s) => s.status, 'status', TodoFormStatus.submitting),
+      isA<TodoFormState>().having(
+        (s) => s.status,
+        'status',
+        TodoFormStatus.submitting,
+      ),
       isA<TodoFormState>()
           .having((s) => s.status, 'status', TodoFormStatus.success)
           .having((s) => s.savedTodo?.title, 'saved', 'New'),
@@ -105,8 +111,11 @@ void main() {
     expect: () => [
       isA<TodoFormState>(),
       isA<TodoFormState>(),
-      isA<TodoFormState>()
-          .having((s) => s.status, 'status', TodoFormStatus.submitting),
+      isA<TodoFormState>().having(
+        (s) => s.status,
+        'status',
+        TodoFormStatus.submitting,
+      ),
       isA<TodoFormState>()
           .having((s) => s.status, 'status', TodoFormStatus.failure)
           .having((s) => s.errorMessage, 'error', 'write failed'),

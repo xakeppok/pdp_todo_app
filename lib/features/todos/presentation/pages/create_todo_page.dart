@@ -34,7 +34,8 @@ class EditTodoPage extends StatelessWidget {
 
 class TodoFormPage extends StatefulWidget {
   const TodoFormPage({
-    required this.title, super.key,
+    required this.title,
+    super.key,
   });
 
   final String title;

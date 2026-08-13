@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_filter.dart';
 import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
 
 class TodoFilterBar extends StatelessWidget {
   const TodoFilterBar({
-    required this.selected, required this.onChanged, super.key,
+    required this.selected,
+    required this.onChanged,
+    super.key,
   });
 
   final TodoFilter selected;

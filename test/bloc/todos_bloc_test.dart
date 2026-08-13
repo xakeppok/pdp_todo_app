@@ -24,10 +24,10 @@ void main() {
   });
 
   TodosBloc buildBloc() => buildTodosBloc(
-        getTodos: getTodos,
-        deleteTodo: deleteTodo,
-        toggleTodoCompletion: toggleTodoCompletion,
-      );
+    getTodos: getTodos,
+    deleteTodo: deleteTodo,
+    toggleTodoCompletion: toggleTodoCompletion,
+  );
 
   blocTest<TodosBloc, TodosState>(
     'load emits loading then loaded',
@@ -213,8 +213,9 @@ void main() {
     'delete failure keeps list and sets actionMessage',
     build: () {
       when(() => getTodos()).thenAnswer((_) async => buildTodoList());
-      when(() => deleteTodo(any()))
-          .thenThrow(const ServerFailure('delete failed'));
+      when(
+        () => deleteTodo(any()),
+      ).thenThrow(const ServerFailure('delete failed'));
       return buildBloc();
     },
     act: (bloc) async {
@@ -237,8 +238,9 @@ void main() {
     'clear action message resets snackbar payload',
     build: () {
       when(() => getTodos()).thenAnswer((_) async => buildTodoList());
-      when(() => deleteTodo(any()))
-          .thenThrow(const ServerFailure('delete failed'));
+      when(
+        () => deleteTodo(any()),
+      ).thenThrow(const ServerFailure('delete failed'));
       return buildBloc();
     },
     act: (bloc) async {

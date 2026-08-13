@@ -25,8 +25,8 @@ class UpdateTodo {
   }
 
   TodoPriority _priorityFrom(String value) => switch (value) {
-        'low' => TodoPriority.low,
-        'high' => TodoPriority.high,
-        _ => TodoPriority.medium,
-      };
+    'low' => TodoPriority.low,
+    'high' => TodoPriority.high,
+    _ => TodoPriority.medium,
+  };
 }

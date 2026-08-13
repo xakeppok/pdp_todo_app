@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_priority.dart';
@@ -64,12 +63,12 @@ class Todo extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        priority,
-        dueDate,
-        completed,
-        tags,
-      ];
+    id,
+    title,
+    description,
+    priority,
+    dueDate,
+    completed,
+    tags,
+  ];
 }

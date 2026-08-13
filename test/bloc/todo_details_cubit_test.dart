@@ -28,18 +28,17 @@ void main() {
   });
 
   TodoDetailsCubit buildCubit() => TodoDetailsCubit(
-        todoId: 'todo-1',
-        getTodoById: getTodoById,
-        toggleTodoCompletion: toggleTodoCompletion,
-        deleteTodo: deleteTodo,
-      );
+    todoId: 'todo-1',
+    getTodoById: getTodoById,
+    toggleTodoCompletion: toggleTodoCompletion,
+    deleteTodo: deleteTodo,
+  );
 
   blocTest<TodoDetailsCubit, TodoDetailsState>(
     'load emits loading then loaded',
     build: buildCubit,
     setUp: () {
-      when(() => getTodoById('todo-1'))
-          .thenAnswer((_) async => buildTodo());
+      when(() => getTodoById('todo-1')).thenAnswer((_) async => buildTodo());
     },
     act: (cubit) => cubit.load(),
     expect: () => [
@@ -52,8 +51,9 @@ void main() {
     'load failure emits error',
     build: buildCubit,
     setUp: () {
-      when(() => getTodoById('todo-1'))
-          .thenThrow(const NotFoundFailure('missing'));
+      when(
+        () => getTodoById('todo-1'),
+      ).thenThrow(const NotFoundFailure('missing'));
     },
     act: (cubit) => cubit.load(),
     expect: () => [
@@ -74,8 +74,11 @@ void main() {
     },
     act: (cubit) => cubit.toggleCompleted(),
     expect: () => [
-      isA<TodoDetailsLoaded>()
-          .having((s) => s.todo.completed, 'completed', isTrue),
+      isA<TodoDetailsLoaded>().having(
+        (s) => s.todo.completed,
+        'completed',
+        isTrue,
+      ),
     ],
   );
 

@@ -56,8 +56,9 @@ final class TodosLoaded extends TodosState {
       allTodos: allTodos ?? this.allTodos,
       filter: filter ?? this.filter,
       sort: sort ?? this.sort,
-      actionMessage:
-          clearActionMessage ? null : actionMessage ?? this.actionMessage,
+      actionMessage: clearActionMessage
+          ? null
+          : actionMessage ?? this.actionMessage,
     );
   }
 

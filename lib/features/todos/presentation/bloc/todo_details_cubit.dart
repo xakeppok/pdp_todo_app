@@ -38,8 +38,9 @@ final class TodoDetailsLoaded extends TodoDetailsState {
   }) {
     return TodoDetailsLoaded(
       todo: todo ?? this.todo,
-      actionMessage:
-          clearActionMessage ? null : actionMessage ?? this.actionMessage,
+      actionMessage: clearActionMessage
+          ? null
+          : actionMessage ?? this.actionMessage,
     );
   }
 

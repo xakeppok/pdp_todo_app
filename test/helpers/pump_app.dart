@@ -9,6 +9,10 @@ import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
 import 'package:pdp_todo_app/features/battery/domain/usecases/get_battery_level.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
+import 'package:pdp_todo_app/features/connectivity/domain/entities/connectivity_status.dart';
+import 'package:pdp_todo_app/features/connectivity/domain/usecases/watch_connectivity.dart';
+import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
+import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_state.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/repositories/todo_repository.dart';
 import 'package:pdp_todo_app/features/todos/domain/services/todo_query.dart';
@@ -35,6 +39,8 @@ class MockCreateTodo extends Mock implements CreateTodo {}
 class MockUpdateTodo extends Mock implements UpdateTodo {}
 
 class MockGetBatteryLevel extends Mock implements GetBatteryLevel {}
+
+class MockWatchConnectivity extends Mock implements WatchConnectivity {}
 
 class FakeTodo extends Fake implements Todo {}
 
@@ -68,12 +74,27 @@ Future<BatteryCubit> buildLoadedBatteryCubit({int level = 85}) async {
   return cubit;
 }
 
+Future<ConnectivityCubit> buildLoadedConnectivityCubit({
+  ConnectivityStatus status = ConnectivityStatus.wifi,
+}) async {
+  final watchConnectivity = MockWatchConnectivity();
+  when(watchConnectivity.call).thenAnswer((_) => Stream.value(status));
+  final cubit = ConnectivityCubit(watchConnectivity);
+  final loaded = cubit.stream.firstWhere(
+    (state) => state is ConnectivityLoaded,
+  );
+  cubit.watch();
+  await loaded;
+  return cubit;
+}
+
 Future<void> pumpTodosPage(
   WidgetTester tester, {
   required TodosBloc bloc,
   Clock? clock,
   ThemeCubit? themeCubit,
   BatteryCubit? batteryCubit,
+  ConnectivityCubit? connectivityCubit,
   ThemeMode themeMode = ThemeMode.light,
   Size surfaceSize = const Size(390, 844),
   void Function(String location)? onNavigate,
@@ -89,6 +110,12 @@ Future<void> pumpTodosPage(
   final resolvedBatteryCubit = batteryCubit ?? await buildLoadedBatteryCubit();
   if (batteryCubit == null) {
     addTearDown(resolvedBatteryCubit.close);
+  }
+
+  final resolvedConnectivityCubit =
+      connectivityCubit ?? await buildLoadedConnectivityCubit();
+  if (connectivityCubit == null) {
+    addTearDown(resolvedConnectivityCubit.close);
   }
 
   final router = GoRouter(
@@ -132,6 +159,7 @@ Future<void> pumpTodosPage(
         BlocProvider.value(value: bloc),
         BlocProvider.value(value: resolvedThemeCubit),
         BlocProvider.value(value: resolvedBatteryCubit),
+        BlocProvider.value(value: resolvedConnectivityCubit),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, mode) {

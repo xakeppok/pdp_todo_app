@@ -37,8 +37,9 @@ void main() {
   group('GetTodoById', () {
     test('returns todo when found', () async {
       final todo = buildTodo();
-      when(() => repository.getTodoById('todo-1'))
-          .thenAnswer((_) async => todo);
+      when(
+        () => repository.getTodoById('todo-1'),
+      ).thenAnswer((_) async => todo);
 
       final result = await GetTodoById(repository)('todo-1');
 
@@ -102,42 +103,44 @@ void main() {
   group('UpdateTodo', () {
     const validator = TodoValidator();
 
-    test('validation failure does not call repository; success delegates',
-        () async {
-      final existing = buildTodo();
-      final useCase = UpdateTodo(repository, validator);
+    test(
+      'validation failure does not call repository; success delegates',
+      () async {
+        final existing = buildTodo();
+        final useCase = UpdateTodo(repository, validator);
 
-      expect(
-        () => useCase(
+        expect(
+          () => useCase(
+            existing: existing,
+            input: const TodoInput(
+              title: '',
+              description: '',
+              priority: 'medium',
+              dueDateInput: '2026-08-12',
+            ),
+          ),
+          throwsA(isA<ValidationFailure>()),
+        );
+        verifyNever(() => repository.updateTodo(any()));
+
+        when(() => repository.updateTodo(any())).thenAnswer(
+          (invocation) async => invocation.positionalArguments.first as Todo,
+        );
+
+        final updated = await useCase(
           existing: existing,
           input: const TodoInput(
-            title: '',
-            description: '',
-            priority: 'medium',
-            dueDateInput: '2026-08-12',
+            title: 'Updated',
+            description: 'Body',
+            priority: 'low',
+            dueDateInput: '2026-08-18',
           ),
-        ),
-        throwsA(isA<ValidationFailure>()),
-      );
-      verifyNever(() => repository.updateTodo(any()));
+        );
 
-      when(() => repository.updateTodo(any())).thenAnswer(
-        (invocation) async => invocation.positionalArguments.first as Todo,
-      );
-
-      final updated = await useCase(
-        existing: existing,
-        input: const TodoInput(
-          title: 'Updated',
-          description: 'Body',
-          priority: 'low',
-          dueDateInput: '2026-08-18',
-        ),
-      );
-
-      expect(updated.title, 'Updated');
-      verify(() => repository.updateTodo(any())).called(1);
-    });
+        expect(updated.title, 'Updated');
+        verify(() => repository.updateTodo(any())).called(1);
+      },
+    );
   });
 
   group('DeleteTodo', () {

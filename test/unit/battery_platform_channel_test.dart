@@ -33,21 +33,23 @@ void main() {
     );
   });
 
-  test('invokes getBatteryLevel on the native channel and returns level',
-      () async {
-    final level = await dataSource.getBatteryLevel();
+  test(
+    'invokes getBatteryLevel on the native channel and returns level',
+    () async {
+      final level = await dataSource.getBatteryLevel();
 
-    expect(level, 76);
-    expect(
-      log,
-      [
-        isMethodCall(
-          BatteryPlatformDataSource.getBatteryLevelMethod,
-          arguments: null,
-        ),
-      ],
-    );
-  });
+      expect(level, 76);
+      expect(
+        log,
+        [
+          isMethodCall(
+            BatteryPlatformDataSource.getBatteryLevelMethod,
+            arguments: null,
+          ),
+        ],
+      );
+    },
+  );
 
   test('maps native UNAVAILABLE error to PlatformFailure', () async {
     mockBatteryChannelError();

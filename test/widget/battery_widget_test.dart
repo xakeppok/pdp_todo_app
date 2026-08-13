@@ -33,8 +33,9 @@ void main() {
 
   tearDown(() => setMockBatteryChannel(null));
 
-  testWidgets('shows battery level returned by the native channel',
-      (tester) async {
+  testWidgets('shows battery level returned by the native channel', (
+    tester,
+  ) async {
     mockBatteryLevel(42);
     cubit = createCubit();
     addTearDown(cubit.close);
@@ -48,8 +49,9 @@ void main() {
     expect(find.text('Fair'), findsOneWidget);
   });
 
-  testWidgets('shows unavailable when the native channel errors',
-      (tester) async {
+  testWidgets('shows unavailable when the native channel errors', (
+    tester,
+  ) async {
     mockBatteryChannelError();
     cubit = createCubit();
     addTearDown(cubit.close);
@@ -62,8 +64,9 @@ void main() {
     expect(find.text('Tap to retry'), findsOneWidget);
   });
 
-  testWidgets('does not hit the channel in background, refreshes on resume',
-      (tester) async {
+  testWidgets('does not hit the channel in background, refreshes on resume', (
+    tester,
+  ) async {
     var calls = 0;
     var level = 42;
     setMockBatteryChannel((call) async {

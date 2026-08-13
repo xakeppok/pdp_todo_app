@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pdp_todo_app/app/widgets/battery_widget.dart';
+import 'package:pdp_todo_app/app/widgets/connectivity_widget.dart';
 import 'package:pdp_todo_app/app/widgets/failure_mode_toggle_button.dart';
 import 'package:pdp_todo_app/app/widgets/theme_toggle_button.dart';
 import 'package:pdp_todo_app/core/clock/clock.dart';
@@ -61,6 +62,7 @@ class TodosPage extends StatelessWidget {
         body: Column(
           children: [
             const BatteryWidget(),
+            const ConnectivityWidget(),
             BlocBuilder<TodosBloc, TodosState>(
               builder: (context, state) {
                 return TodoFilterBar(

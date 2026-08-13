@@ -5,7 +5,9 @@ import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
 
 class TodoSortMenu extends StatelessWidget {
   const TodoSortMenu({
-    required this.selected, required this.onChanged, super.key,
+    required this.selected,
+    required this.onChanged,
+    super.key,
   });
 
   final TodoSort selected;

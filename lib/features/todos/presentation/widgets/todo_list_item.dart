@@ -7,7 +7,9 @@ import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
 
 class TodoListItem extends StatelessWidget {
   const TodoListItem({
-    required this.todo, required this.clock, super.key,
+    required this.todo,
+    required this.clock,
+    super.key,
     this.onTap,
     this.onToggleCompleted,
     this.onDelete,

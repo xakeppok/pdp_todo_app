@@ -4,7 +4,8 @@ import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
 
 class TodosErrorView extends StatelessWidget {
   const TodosErrorView({
-    required this.message, super.key,
+    required this.message,
+    super.key,
     this.onRetry,
   });
 
