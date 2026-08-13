@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pdp_todo_app/app/di.dart';
 import 'package:pdp_todo_app/app/theme.dart';
 import 'package:pdp_todo_app/app/theme_cubit.dart';
+import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 
 class TodoApp extends StatefulWidget {
@@ -63,6 +64,13 @@ class _TodoAppState extends State<TodoApp> {
       providers: [
         BlocProvider.value(value: _todosBloc),
         BlocProvider.value(value: _themeCubit),
+        BlocProvider(
+          create: (_) {
+            final batteryCubit = getIt<BatteryCubit>();
+            unawaited(batteryCubit.getBatteryLevel());
+            return batteryCubit;
+          },
+        ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {

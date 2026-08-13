@@ -7,6 +7,8 @@ import 'package:pdp_todo_app/app/theme.dart';
 import 'package:pdp_todo_app/app/theme_cubit.dart';
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
+import 'package:pdp_todo_app/features/battery/domain/usecases/get_battery_level.dart';
+import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/repositories/todo_repository.dart';
 import 'package:pdp_todo_app/features/todos/domain/services/todo_query.dart';
@@ -32,6 +34,8 @@ class MockCreateTodo extends Mock implements CreateTodo {}
 
 class MockUpdateTodo extends Mock implements UpdateTodo {}
 
+class MockGetBatteryLevel extends Mock implements GetBatteryLevel {}
+
 class FakeTodo extends Fake implements Todo {}
 
 class FakeTodoInput extends Fake implements TodoInput {}
@@ -56,11 +60,20 @@ TodosBloc buildTodosBloc({
   );
 }
 
+Future<BatteryCubit> buildLoadedBatteryCubit({int level = 85}) async {
+  final getBatteryLevel = MockGetBatteryLevel();
+  when(getBatteryLevel.call).thenAnswer((_) async => level);
+  final cubit = BatteryCubit(getBatteryLevel);
+  await cubit.getBatteryLevel();
+  return cubit;
+}
+
 Future<void> pumpTodosPage(
   WidgetTester tester, {
   required TodosBloc bloc,
   Clock? clock,
   ThemeCubit? themeCubit,
+  BatteryCubit? batteryCubit,
   ThemeMode themeMode = ThemeMode.light,
   Size surfaceSize = const Size(390, 844),
   void Function(String location)? onNavigate,
@@ -72,6 +85,11 @@ Future<void> pumpTodosPage(
 
   final resolvedThemeCubit = themeCubit ?? ThemeCubit(themeMode);
   addTearDown(resolvedThemeCubit.close);
+
+  final resolvedBatteryCubit = batteryCubit ?? await buildLoadedBatteryCubit();
+  if (batteryCubit == null) {
+    addTearDown(resolvedBatteryCubit.close);
+  }
 
   final router = GoRouter(
     initialLocation: AppRoutes.todos,
@@ -113,6 +131,7 @@ Future<void> pumpTodosPage(
       providers: [
         BlocProvider.value(value: bloc),
         BlocProvider.value(value: resolvedThemeCubit),
+        BlocProvider.value(value: resolvedBatteryCubit),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, mode) {

@@ -2,10 +2,14 @@ import 'dart:async';
 
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/router/app_router.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
+import 'package:pdp_todo_app/features/battery/data/datasources/battery_platform_data_source.dart';
+import 'package:pdp_todo_app/features/battery/data/repositories/battery_repository_impl.dart';
+import 'package:pdp_todo_app/features/battery/domain/repositories/battery_repository.dart';
+import 'package:pdp_todo_app/features/battery/domain/usecases/get_battery_level.dart';
+import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/in_memory_todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
@@ -38,7 +42,8 @@ Future<void> configureDependencies({
   }
 
   final resolvedClock = clock ?? const SystemClock();
-  final resolvedDataSource = dataSource ??
+  final resolvedDataSource =
+      dataSource ??
       InMemoryTodoDataSource(seed: seed, failureMode: failureMode);
 
   getIt
@@ -56,7 +61,13 @@ Future<void> configureDependencies({
       () => UpdateTodo(getIt(), const TodoValidator()),
     )
     ..registerLazySingleton(() => DeleteTodo(getIt()))
-    ..registerLazySingleton(() => ToggleTodoCompletion(getIt()));
+    ..registerLazySingleton(() => ToggleTodoCompletion(getIt()))
+    ..registerLazySingleton(BatteryPlatformDataSource.new)
+    ..registerLazySingleton<BatteryRepository>(
+      () => BatteryRepositoryImpl(getIt()),
+    )
+    ..registerLazySingleton(() => GetBatteryLevel(getIt<BatteryRepository>()))
+    ..registerLazySingleton(() => BatteryCubit(getIt()));
 }
 
 TodosBloc createTodosBloc() {

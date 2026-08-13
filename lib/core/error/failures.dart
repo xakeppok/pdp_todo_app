@@ -10,11 +10,12 @@ sealed class Failure extends Equatable implements Exception {
 
   @override
   String toString() => switch (this) {
-        ValidationFailure() => 'ValidationFailure: $message',
-        NotFoundFailure() => 'NotFoundFailure: $message',
-        ServerFailure() => 'ServerFailure: $message',
-        DomainFailure() => 'DomainFailure: $message',
-      };
+    ValidationFailure() => 'ValidationFailure: $message',
+    NotFoundFailure() => 'NotFoundFailure: $message',
+    ServerFailure() => 'ServerFailure: $message',
+    DomainFailure() => 'DomainFailure: $message',
+    PlatformFailure() => 'PlatformFailure: $message',
+  };
 }
 
 final class ValidationFailure extends Failure {
@@ -31,4 +32,8 @@ final class ServerFailure extends Failure {
 
 final class DomainFailure extends Failure {
   const DomainFailure(super.message);
+}
+
+final class PlatformFailure extends Failure {
+  const PlatformFailure(super.message);
 }
