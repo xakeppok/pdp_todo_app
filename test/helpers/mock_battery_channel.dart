@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdp_todo_app/features/battery/data/datasources/battery_platform_data_source.dart';
 
@@ -29,4 +30,28 @@ void mockBatteryChannelError({
   setMockBatteryChannel((call) async {
     throw PlatformException(code: code, message: message);
   });
+}
+
+void mockBatteryChannelNotImplemented() {
+  setMockBatteryChannel((call) async {
+    throw MissingPluginException();
+  });
+}
+
+void mockBatteryChannelResult(Object? value) {
+  setMockBatteryChannel((call) async => value);
+}
+
+void sendAppToBackground(WidgetTester tester) {
+  tester.binding
+    ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+    ..handleAppLifecycleStateChanged(AppLifecycleState.hidden)
+    ..handleAppLifecycleStateChanged(AppLifecycleState.paused);
+}
+
+void sendAppToForeground(WidgetTester tester) {
+  tester.binding
+    ..handleAppLifecycleStateChanged(AppLifecycleState.hidden)
+    ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+    ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
 }

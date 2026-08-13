@@ -1,4 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
@@ -66,6 +67,71 @@ void main() {
     expect: () => const [
       BatteryLoading(),
       BatteryLoaded(91),
+    ],
+  );
+
+  blocTest<BatteryCubit, BatteryState>(
+    'emits error when native method is not implemented',
+    setUp: mockBatteryChannelNotImplemented,
+    build: () => BatteryCubit(
+      GetBatteryLevel(
+        BatteryRepositoryImpl(BatteryPlatformDataSource()),
+      ),
+    ),
+    act: (cubit) => cubit.getBatteryLevel(),
+    expect: () => [
+      const BatteryLoading(),
+      isA<BatteryError>().having(
+        (state) => state.error,
+        'error',
+        contains('No implementation found'),
+      ),
+    ],
+  );
+
+  blocTest<BatteryCubit, BatteryState>(
+    'emits error when native payload has the wrong codec type',
+    setUp: () => mockBatteryChannelResult('76'),
+    build: () => BatteryCubit(
+      GetBatteryLevel(
+        BatteryRepositoryImpl(BatteryPlatformDataSource()),
+      ),
+    ),
+    act: (cubit) => cubit.getBatteryLevel(),
+    expect: () => const [
+      BatteryLoading(),
+      BatteryError('Battery level has unexpected type'),
+    ],
+  );
+
+  blocTest<BatteryCubit, BatteryState>(
+    'does not refresh when lifecycle goes to background',
+    build: () => BatteryCubit(getBatteryLevel),
+    seed: () => const BatteryLoaded(42),
+    setUp: () {
+      when(() => getBatteryLevel()).thenAnswer((_) async => 18);
+    },
+    act: (cubit) {
+      cubit
+        ..handleAppLifecycle(AppLifecycleState.inactive)
+        ..handleAppLifecycle(AppLifecycleState.hidden)
+        ..handleAppLifecycle(AppLifecycleState.paused);
+    },
+    expect: () => <BatteryState>[],
+    verify: (_) => verifyNever(() => getBatteryLevel()),
+  );
+
+  blocTest<BatteryCubit, BatteryState>(
+    'refreshes battery when lifecycle resumes from background',
+    build: () => BatteryCubit(getBatteryLevel),
+    seed: () => const BatteryLoaded(42),
+    setUp: () {
+      when(() => getBatteryLevel()).thenAnswer((_) async => 18);
+    },
+    act: (cubit) => cubit.handleAppLifecycle(AppLifecycleState.resumed),
+    expect: () => const [
+      BatteryLoading(),
+      BatteryLoaded(18),
     ],
   );
 }

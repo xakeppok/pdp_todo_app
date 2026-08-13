@@ -61,4 +61,36 @@ void main() {
     expect(find.text('Battery unavailable'), findsOneWidget);
     expect(find.text('Tap to retry'), findsOneWidget);
   });
+
+  testWidgets('does not hit the channel in background, refreshes on resume',
+      (tester) async {
+    var calls = 0;
+    var level = 42;
+    setMockBatteryChannel((call) async {
+      calls += 1;
+      return level;
+    });
+
+    cubit = createCubit();
+    addTearDown(cubit.close);
+    await cubit.getBatteryLevel();
+    expect(calls, 1);
+
+    await pumpBattery(tester);
+    await tester.pumpAndSettle();
+    expect(find.text('42%'), findsOneWidget);
+
+    level = 18;
+    sendAppToBackground(tester);
+    await tester.pump();
+
+    expect(calls, 1);
+    expect(find.text('42%'), findsOneWidget);
+
+    sendAppToForeground(tester);
+    await tester.pumpAndSettle();
+
+    expect(calls, 2);
+    expect(find.text('18%'), findsOneWidget);
+  });
 }

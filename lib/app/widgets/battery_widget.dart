@@ -3,8 +3,36 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_state.dart';
 
-class BatteryWidget extends StatelessWidget {
+class BatteryWidget extends StatefulWidget {
   const BatteryWidget({super.key});
+
+  @override
+  State<BatteryWidget> createState() => _BatteryWidgetState();
+}
+
+class _BatteryWidgetState extends State<BatteryWidget> {
+  late final AppLifecycleListener _lifecycleListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycleListener = AppLifecycleListener(
+      onStateChange: _onLifecycleStateChange,
+    );
+  }
+
+  void _onLifecycleStateChange(AppLifecycleState state) {
+    if (!mounted) {
+      return;
+    }
+    context.read<BatteryCubit>().handleAppLifecycle(state);
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

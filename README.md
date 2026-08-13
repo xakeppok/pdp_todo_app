@@ -16,6 +16,8 @@ Not a product Todo app. Just enough Clean Architecture, Bloc, go_router, and bus
 
 Cheat sheet (pyramid, tools, **what to test where**, snippets): [docs/testing-strategy.md](docs/testing-strategy.md)
 
+Platform channels (architecture, codecs, threading, **which channel**, snippets): [docs/platform-channels.md](docs/platform-channels.md)
+
 Goldens (generate / update / review): [docs/goldens.md](docs/goldens.md)
 
 ## Setup
@@ -107,6 +109,10 @@ lib/
     data/        # fake data source, models, repository
     domain/      # entities, validator, query, use cases, repository port
     presentation/# blocs, pages, widgets
+  features/battery/
+    data/        # MethodChannel data source + repository
+    domain/      # port + GetBatteryLevel
+    presentation/# BatteryCubit
 ```
 
 `get_it` only in `lib/app/di.dart` and the integration harness. Pages and `app_router.dart` don't call it — router comes from `createConfiguredRouter()`.
@@ -121,5 +127,6 @@ lib/
 ## Docs
 
 - [Testing cheat sheet](docs/testing-strategy.md) — pyramid, tools, decision guide, snippets
+- [Platform channels](docs/platform-channels.md) — architecture, codecs, threading, which channel, snippets
 - [Goldens](docs/goldens.md) — generate, update, review
 - [CI and flaky tests](docs/ci-and-flaky-tests.md)

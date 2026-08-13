@@ -65,7 +65,7 @@ void main() {
   });
 
   test('maps a null native result to PlatformFailure', () async {
-    setMockBatteryChannel((call) async => null);
+    mockBatteryChannelResult(null);
 
     expect(
       dataSource.getBatteryLevel,
@@ -79,4 +79,63 @@ void main() {
     );
   });
 
+  test('maps result.notImplemented to PlatformFailure', () async {
+    mockBatteryChannelNotImplemented();
+
+    expect(
+      dataSource.getBatteryLevel,
+      throwsA(
+        isA<PlatformFailure>().having(
+          (failure) => failure.message,
+          'message',
+          contains('No implementation found'),
+        ),
+      ),
+    );
+  });
+
+  test('maps a missing channel handler to PlatformFailure', () async {
+    setMockBatteryChannel(null);
+
+    expect(
+      dataSource.getBatteryLevel,
+      throwsA(
+        isA<PlatformFailure>().having(
+          (failure) => failure.message,
+          'message',
+          contains('No implementation found'),
+        ),
+      ),
+    );
+  });
+
+  test('maps a String codec payload to PlatformFailure', () async {
+    mockBatteryChannelResult('76');
+
+    expect(
+      dataSource.getBatteryLevel,
+      throwsA(
+        isA<PlatformFailure>().having(
+          (failure) => failure.message,
+          'message',
+          'Battery level has unexpected type',
+        ),
+      ),
+    );
+  });
+
+  test('maps a double codec payload to PlatformFailure', () async {
+    mockBatteryChannelResult(76.0);
+
+    expect(
+      dataSource.getBatteryLevel,
+      throwsA(
+        isA<PlatformFailure>().having(
+          (failure) => failure.message,
+          'message',
+          'Battery level has unexpected type',
+        ),
+      ),
+    );
+  });
 }
