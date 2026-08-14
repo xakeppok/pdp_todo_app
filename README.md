@@ -16,9 +16,21 @@ Not a product Todo app. Just enough Clean Architecture, Bloc, go_router, and bus
 
 Cheat sheet (pyramid, tools, **what to test where**, snippets): [docs/testing-strategy.md](docs/testing-strategy.md)
 
-Platform channels (architecture, codecs, threading, **which channel**, snippets): [docs/platform-channels.md](docs/platform-channels.md)
+Platform channels (architecture, codecs, threading, **which channel**, snippets, edge cases): [docs/platform-channels.md](docs/platform-channels.md)
 
 Goldens (generate / update / review): [docs/goldens.md](docs/goldens.md)
+
+## Platform channels
+
+Three native conversations, each with a manual channel **and** a Pigeon twin. DI registers one `*DataSource` impl; both native hosts are wired.
+
+| Feature | Manual channel | Conversation | Pigeon |
+|---------|----------------|--------------|--------|
+| Battery | `MethodChannel` `pdp.flutter.app/battery` | one-shot `getBatteryLevel` → `int` | `@HostApi` `BatteryHostApi` |
+| Connectivity | `EventChannel` `pdp.flutter.app/connectivity` | stream `'wifi' \| 'mobile' \| 'none'` | `@EventChannelApi` `connectivityEvents()` |
+| Messages | `BasicMessageChannel` `pdp.flutter.app/messages` | ping `Map` → pong `Map` | `@HostApi` `MessagesHostApi` + DTO |
+
+Codecs, threading (main-thread event sink), **which channel**, annotated snippets, and edge cases (missing plugin, codec type failures, backgrounding): [docs/platform-channels.md](docs/platform-channels.md).
 
 ## Setup
 
@@ -104,15 +116,24 @@ flutter test --update-goldens test/golden
 ```
 lib/
   app/           # DI (get_it), themes, TodoApp
-  core/          # failures, clock, router
+  core/          # failures, clock, router, pigeon generated APIs
   features/todos/
     data/        # fake data source, models, repository
     domain/      # entities, validator, query, use cases, repository port
     presentation/# blocs, pages, widgets
   features/battery/
-    data/        # MethodChannel data source + repository
+    data/        # BatteryDataSource + platform/pigeon impls + repository
     domain/      # port + GetBatteryLevel
-    presentation/# BatteryCubit
+    presentation/# BatteryCubit, lifecycle-aware widget
+  features/connectivity/
+    data/        # EventChannel / pigeon stream + repository
+    domain/      # port + WatchConnectivity
+    presentation/# ConnectivityCubit
+  features/messages/
+    data/        # BasicMessageChannel / pigeon HostApi + repository
+    domain/      # port + SendPing
+    presentation/# MessagesCubit, messages page
+pigeons/         # Pigeon contract (not compiled into the app)
 ```
 
 `get_it` only in `lib/app/di.dart` and the integration harness. Pages and `app_router.dart` don't call it — router comes from `createConfiguredRouter()`.
@@ -121,12 +142,13 @@ lib/
 
 - Flutter 3.44.9 / Dart 3.12.2
 - flutter_bloc, go_router, get_it, equatable
+- pigeon (dev) — typed Dart/Kotlin/Swift channel codegen
 - mocktail, bloc_test, golden_toolkit, integration_test
 - very_good_analysis (`flutter analyze --fatal-infos` in CI)
 
 ## Docs
 
 - [Testing cheat sheet](docs/testing-strategy.md) — pyramid, tools, decision guide, snippets
-- [Platform channels](docs/platform-channels.md) — architecture, codecs, threading, which channel, snippets
+- [Platform channels](docs/platform-channels.md) — architecture, codecs, threading, which channel, snippets, edge cases
 - [Goldens](docs/goldens.md) — generate, update, review
 - [CI and flaky tests](docs/ci-and-flaky-tests.md)
