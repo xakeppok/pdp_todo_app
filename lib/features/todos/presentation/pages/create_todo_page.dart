@@ -74,7 +74,7 @@ class _TodoFormPageState extends State<TodoFormPage> {
     return BlocConsumer<TodoFormCubit, TodoFormState>(
       listenWhen: (previous, current) =>
           previous.status != current.status &&
-          current.status == TodoFormStatus.success,
+          current.status.isSuccess,
       listener: (context, state) {
         final saved = state.savedTodo;
         if (saved != null) {
@@ -164,11 +164,9 @@ class _TodoFormPageState extends State<TodoFormPage> {
               const SizedBox(height: 24),
               FilledButton(
                 key: TodosKeys.submitButton,
-                onPressed: state.status == TodoFormStatus.submitting
-                    ? null
-                    : cubit.submit,
+                onPressed: state.status.isSubmitting ? null : cubit.submit,
                 child: Text(
-                  state.status == TodoFormStatus.submitting
+                  state.status.isSubmitting
                       ? 'Saving...'
                       : (state.isEditing ? 'Save changes' : 'Create todo'),
                 ),

@@ -23,6 +23,12 @@ import 'package:pdp_todo_app/features/messages/data/repositories/messages_reposi
 import 'package:pdp_todo_app/features/messages/domain/repositories/messages_repository.dart';
 import 'package:pdp_todo_app/features/messages/domain/usecases/send_ping.dart';
 import 'package:pdp_todo_app/features/messages/presentation/bloc/messages_cubit.dart';
+import 'package:pdp_todo_app/features/native_map/data/datasources/map_data_source.dart';
+import 'package:pdp_todo_app/features/native_map/data/datasources/map_pigeon_data_source.dart';
+import 'package:pdp_todo_app/features/native_map/data/repositories/map_repository_impl.dart';
+import 'package:pdp_todo_app/features/native_map/domain/repositories/map_repository.dart';
+import 'package:pdp_todo_app/features/native_map/domain/usecases/watch_map_clicks.dart';
+import 'package:pdp_todo_app/features/native_map/presentation/bloc/map_cubit.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/in_memory_todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
@@ -107,6 +113,16 @@ Future<void> configureDependencies({
     ..registerLazySingleton(() => SendPing(getIt<MessagesRepository>()))
     ..registerLazySingleton(
       () => MessagesCubit(sendPing: getIt()),
+    )
+    ..registerLazySingleton<MapDataSource>(MapPigeonDataSource.new)
+    ..registerLazySingleton<MapRepository>(
+      () => MapRepositoryImpl(getIt<MapDataSource>()),
+    )
+    ..registerLazySingleton(
+      () => WatchMapClicks(getIt<MapRepository>()),
+    )
+    ..registerFactory(
+      () => MapCubit(getIt<WatchMapClicks>()),
     );
 }
 
@@ -139,11 +155,16 @@ TodoDetailsCubit createTodoDetailsCubit(String todoId) {
   return cubit;
 }
 
+MapCubit createMapCubit() {
+  return getIt<MapCubit>()..watch();
+}
+
 GoRouter createConfiguredRouter({String initialLocation = AppRoutes.todos}) {
   return createAppRouter(
     clock: getIt<Clock>(),
     createFormCubit: createTodoFormCubit,
     createDetailsCubit: createTodoDetailsCubit,
+    createMapCubit: createMapCubit,
     initialLocation: initialLocation,
   );
 }

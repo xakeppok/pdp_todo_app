@@ -2,6 +2,8 @@
 
 Short guide for this repo: architecture, codecs, threading, **which channel**, annotated snippets, and the edge cases the suite actually covers.
 
+Knowledge-sharing session, Platform Views, and use-case trade-offs (separate doc): [platform-interop.md](platform-interop.md).
+
 Two stacks sit side by side. Native hosts for both are registered. Dart DI picks **one** `*DataSource` implementation.
 
 | Stack | Dart | Native | Channel names |
@@ -29,6 +31,7 @@ Dart UI isolate
   Android main thread / iOS main queue
     BatteryChannel / ConnectivityChannel / MessagesChannel
     BatteryPigeonApi / ConnectivityPigeonStreamHandler / MessagesPigeonApi
+    NativeMapViewFactory / MapPigeonStreamHandler
 ```
 
 - **Domain** never imports `flutter/services.dart` or pigeon `*.g.dart`.
@@ -92,7 +95,7 @@ JSON codec (`JSONMessageCodec`) is **not** used here. Don't mix it with `Standar
 | Side | Thread |
 |------|--------|
 | Dart | UI isolate. `await channel.invokeMethod` does not block the isolate; it waits on a Future. |
-| Android handler | Platform **main** thread (unless you set a `TaskQueue`). |
+| Android handler | Platform **main** thread |
 | iOS handler | Main queue. |
 | Event sink | Must be called on the **platform thread**. |
 
@@ -101,9 +104,9 @@ Connectivity callbacks are **not** guaranteed on main:
 - Android `ConnectivityManager.NetworkCallback` → hop with `Handler(Looper.getMainLooper()).post { eventSink?.success(status) }`
 - iOS `NWPathMonitor` runs on `DispatchQueue(label: "pdp.connectivity")` → hop with `DispatchQueue.main.async` before `eventSink`
 
-Do **not** do heavy work in the method handler; reply once (`result.success` / `result.error` / `reply.reply`). For slow work, jump off main and hop back to reply.
+Reply once (`result.success` / `result.error` / `notImplemented`). Battery and messages handlers in this app are quick reads/replies.
 
-Pigeon does not change this model. `@HostApi` methods still run on the platform thread. `@async` on the pigeon method only changes whether native replies via a callback.
+Pigeon `@HostApi` methods in this contract are native-synchronous (`getBatteryLevel`, `sendPing`). There is no `@async` in `pigeons/platform_apis.dart`. Event sinks still hop to main.
 
 ## Decision guide: which channel?
 
@@ -115,7 +118,6 @@ Ask what the conversation looks like — then pick the thinnest API that matches
 | Native pushes updates (`wifi` → `mobile`) | **EventChannel** or Pigeon `@EventChannelApi` | Poll a MethodChannel on a timer |
 | Symmetric message / no method name (ping/pong, custom envelope) | **BasicMessageChannel** or Pigeon `@HostApi` + DTO | Fake methods as map keys unless that's the exercise |
 | Several methods, shared Android/iOS contract, typed args | **Pigeon** | Hand-sync three stringly APIs |
-| Native calls into Dart | Pigeon `@FlutterApi` or `MethodChannel` set on Dart | — (not in this app) |
 | Dart `int` vs platform number bugs, missing plugin, background | Keep the **manual** stack + tests | Rely on Pigeon alone (it hides codec surprises) |
 
 **Quick rule:** MethodChannel = RPC, EventChannel = subscribe, BasicMessageChannel = typed blob, Pigeon = generated version of those three.
@@ -123,15 +125,16 @@ Ask what the conversation looks like — then pick the thinnest API that matches
 ## Clean Architecture map
 
 ```
-Widget / Bloc     → BatteryCubit, ConnectivityCubit, MessagesCubit
-Use case          → GetBatteryLevel, WatchConnectivity, SendPing
+Widget / Bloc     → BatteryCubit, ConnectivityCubit, MessagesCubit, MapCubit
+Use case          → GetBatteryLevel, WatchConnectivity, SendPing, WatchMapClicks
 Domain port       → BatteryRepository, …
 Data              → *RepositoryImpl → *DataSource
 Manual impl       → *PlatformDataSource + *Channel.kt/swift
 Pigeon impl       → *PigeonDataSource + generated *.g.* + *PigeonApi
+Platform View     → NativeMapPage + NativeMapViewFactory (clicks: MapPigeonStreamHandler)
 ```
 
-`get_it` registers `BatteryDataSource` (one impl). Same for connectivity and messages.
+`get_it` registers `BatteryDataSource` (one impl). Same for connectivity, messages, and map.
 
 ## Annotated snippets
 

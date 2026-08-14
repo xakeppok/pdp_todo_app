@@ -37,20 +37,28 @@ enum ApiConnectivityStatus {
   none,
 }
 
-/// Typed replacement for [MethodChannel] `pdp.flutter.app/battery`.
+class ApiMapClick {
+  ApiMapClick({
+    required this.latitude,
+    required this.longitude,
+  });
+
+  double latitude;
+  double longitude;
+}
+
 @HostApi()
 abstract class BatteryHostApi {
   int getBatteryLevel();
 }
 
-/// Typed replacement for [BasicMessageChannel] `pdp.flutter.app/messages`.
 @HostApi()
 abstract class MessagesHostApi {
   ApiChannelMessage sendPing(ApiChannelMessage ping);
 }
 
-/// Typed replacement for [EventChannel] `pdp.flutter.app/connectivity`.
 @EventChannelApi()
-abstract class ConnectivityEventApi {
+abstract class PlatformEventApi {
   ApiConnectivityStatus connectivityEvents();
+  ApiMapClick onMapClick();
 }

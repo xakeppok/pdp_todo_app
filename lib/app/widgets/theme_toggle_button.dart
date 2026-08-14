@@ -10,14 +10,14 @@ class ThemeToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, ThemeMode>(
       builder: (context, mode) {
-        final (icon, tooltip) = switch (mode) {
-          ThemeMode.system => (Icons.brightness_auto, 'Theme: system'),
-          ThemeMode.light => (Icons.light_mode, 'Theme: light'),
-          ThemeMode.dark => (Icons.dark_mode, 'Theme: dark'),
+        final icon = switch (mode) {
+          ThemeMode.system => Icons.brightness_auto,
+          ThemeMode.light => Icons.light_mode,
+          ThemeMode.dark => Icons.dark_mode,
         };
         return IconButton(
           key: TodosKeys.themeToggle,
-          tooltip: tooltip,
+          tooltip: 'Theme: ${mode.label}',
           icon: Icon(icon),
           onPressed: () => context.read<ThemeCubit>().cycle(),
         );

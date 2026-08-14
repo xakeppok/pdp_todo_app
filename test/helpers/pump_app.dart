@@ -16,6 +16,7 @@ import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivit
 import 'package:pdp_todo_app/features/messages/domain/usecases/send_ping.dart';
 import 'package:pdp_todo_app/features/messages/presentation/bloc/messages_cubit.dart';
 import 'package:pdp_todo_app/features/messages/presentation/messages_keys.dart';
+import 'package:pdp_todo_app/features/native_map/presentation/native_map_keys.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/repositories/todo_repository.dart';
 import 'package:pdp_todo_app/features/todos/domain/services/todo_query.dart';
@@ -180,6 +181,16 @@ Future<void> pumpTodosPage(
           return const Scaffold(
             key: MessagesKeys.page,
             body: Text('Messages stub'),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.nativeMap,
+        builder: (context, state) {
+          onNavigate?.call(AppRoutes.nativeMap);
+          return const Scaffold(
+            key: NativeMapKeys.page,
+            body: Text('Native map stub'),
           );
         },
       ),

@@ -259,6 +259,47 @@ data class ApiChannelMessage (
     return "ApiChannelMessage(type=$type, id=$id, payload=$payload)"
   }
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ApiMapClick (
+  val latitude: Double,
+  val longitude: Double
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ApiMapClick {
+      val latitude = pigeonVar_list[0] as Double
+      val longitude = pigeonVar_list[1] as Double
+      return ApiMapClick(latitude, longitude)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      latitude,
+      longitude,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ApiMapClick
+    return PlatformApisPigeonUtils.deepEquals(this.latitude, other.latitude) && PlatformApisPigeonUtils.deepEquals(this.longitude, other.longitude)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + PlatformApisPigeonUtils.deepHash(this.latitude)
+    result = 31 * result + PlatformApisPigeonUtils.deepHash(this.longitude)
+    return result
+  }
+  override fun toString(): String {
+    return "ApiMapClick(latitude=$latitude, longitude=$longitude)"
+  }
+}
 private open class PlatformApisPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -275,6 +316,11 @@ private open class PlatformApisPigeonCodec : StandardMessageCodec() {
       131.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ApiChannelMessage.fromList(it)
+        }
+      }
+      132.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ApiMapClick.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -294,6 +340,10 @@ private open class PlatformApisPigeonCodec : StandardMessageCodec() {
         stream.write(131)
         writeValue(stream, value.toList())
       }
+      is ApiMapClick -> {
+        stream.write(132)
+        writeValue(stream, value.toList())
+      }
       else -> super.writeValue(stream, value)
     }
   }
@@ -301,11 +351,7 @@ private open class PlatformApisPigeonCodec : StandardMessageCodec() {
 
 val PlatformApisPigeonMethodCodec = StandardMethodCodec(PlatformApisPigeonCodec())
 
-/**
- * Typed replacement for [MethodChannel] `pdp.flutter.app/battery`.
- *
- * Generated interface from Pigeon that represents a handler of messages from Flutter.
- */
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface BatteryHostApi {
   fun getBatteryLevel(): Long
 
@@ -336,11 +382,7 @@ interface BatteryHostApi {
     }
   }
 }
-/**
- * Typed replacement for [BasicMessageChannel] `pdp.flutter.app/messages`.
- *
- * Generated interface from Pigeon that represents a handler of messages from Flutter.
- */
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface MessagesHostApi {
   fun sendPing(ping: ApiChannelMessage): ApiChannelMessage
 
@@ -410,11 +452,10 @@ class PigeonEventSink<T>(private val sink: EventChannel.EventSink) {
   }
 }
       
-/** Typed replacement for [EventChannel] `pdp.flutter.app/connectivity`. */
 abstract class ConnectivityEventsStreamHandler : PlatformApisPigeonEventChannelWrapper<ApiConnectivityStatus> {
   companion object {
     fun register(messenger: BinaryMessenger, streamHandler: ConnectivityEventsStreamHandler, instanceName: String = "") {
-      var channelName: String = "dev.flutter.pigeon.pdp_todo_app.ConnectivityEventApi.connectivityEvents"
+      var channelName: String = "dev.flutter.pigeon.pdp_todo_app.PlatformEventApi.connectivityEvents"
       if (instanceName.isNotEmpty()) {
         channelName += ".$instanceName"
       }
@@ -424,6 +465,23 @@ abstract class ConnectivityEventsStreamHandler : PlatformApisPigeonEventChannelW
   }
 // Implement methods from PlatformApisPigeonEventChannelWrapper
 override fun onListen(p0: Any?, sink: PigeonEventSink<ApiConnectivityStatus>) {}
+
+override fun onCancel(p0: Any?) {}
+}
+      
+abstract class OnMapClickStreamHandler : PlatformApisPigeonEventChannelWrapper<ApiMapClick> {
+  companion object {
+    fun register(messenger: BinaryMessenger, streamHandler: OnMapClickStreamHandler, instanceName: String = "") {
+      var channelName: String = "dev.flutter.pigeon.pdp_todo_app.PlatformEventApi.onMapClick"
+      if (instanceName.isNotEmpty()) {
+        channelName += ".$instanceName"
+      }
+      val internalStreamHandler = PlatformApisPigeonStreamHandler<ApiMapClick>(streamHandler)
+      EventChannel(messenger, channelName, PlatformApisPigeonMethodCodec).setStreamHandler(internalStreamHandler)
+    }
+  }
+// Implement methods from PlatformApisPigeonEventChannelWrapper
+override fun onListen(p0: Any?, sink: PigeonEventSink<ApiMapClick>) {}
 
 override fun onCancel(p0: Any?) {}
 }

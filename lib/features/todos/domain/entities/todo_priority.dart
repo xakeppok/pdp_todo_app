@@ -7,4 +7,16 @@ enum TodoPriority {
 
   final int rank;
   final String label;
+
+  static TodoPriority? tryParse(String raw) {
+    return switch (raw.trim().toLowerCase()) {
+      'low' => TodoPriority.low,
+      'medium' => TodoPriority.medium,
+      'high' => TodoPriority.high,
+      _ => null,
+    };
+  }
+
+  static TodoPriority fromName(String raw) =>
+      tryParse(raw) ?? TodoPriority.medium;
 }

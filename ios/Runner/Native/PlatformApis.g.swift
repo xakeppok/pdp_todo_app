@@ -240,6 +240,46 @@ struct ApiChannelMessage: Hashable, CustomStringConvertible {
   }
 }
 
+/// Generated class from Pigeon that represents data sent in messages.
+struct ApiMapClick: Hashable, CustomStringConvertible {
+  var latitude: Double
+  var longitude: Double
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> ApiMapClick? {
+    let latitude = pigeonVar_list[0] as! Double
+    let longitude = pigeonVar_list[1] as! Double
+
+    return ApiMapClick(
+      latitude: latitude,
+      longitude: longitude
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      latitude,
+      longitude,
+    ]
+  }
+  static func == (lhs: ApiMapClick, rhs: ApiMapClick) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return PlatformApisPigeonInternal.deepEquals(lhs.latitude, rhs.latitude) && PlatformApisPigeonInternal.deepEquals(lhs.longitude, rhs.longitude)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("ApiMapClick")
+    PlatformApisPigeonInternal.deepHash(value: latitude, hasher: &hasher)
+    PlatformApisPigeonInternal.deepHash(value: longitude, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "ApiMapClick(latitude: \(String(describing: latitude)), longitude: \(String(describing: longitude)))"
+  }
+}
+
 private class PlatformApisPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
@@ -257,6 +297,8 @@ private class PlatformApisPigeonCodecReader: FlutterStandardReader {
       return nil
     case 131:
       return ApiChannelMessage.fromList(self.readValue() as! [Any?])
+    case 132:
+      return ApiMapClick.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
     }
@@ -273,6 +315,9 @@ private class PlatformApisPigeonCodecWriter: FlutterStandardWriter {
       super.writeValue(value.rawValue)
     } else if let value = value as? ApiChannelMessage {
       super.writeByte(131)
+      super.writeValue(value.toList())
+    } else if let value = value as? ApiMapClick {
+      super.writeByte(132)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -296,8 +341,6 @@ class PlatformApisPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable 
 
 var platformApisPigeonMethodCodec = FlutterStandardMethodCodec(readerWriter: PlatformApisPigeonCodecReaderWriter());
 
-/// Typed replacement for [MethodChannel] `pdp.flutter.app/battery`.
-///
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol BatteryHostApi {
   func getBatteryLevel() throws -> Int64
@@ -324,8 +367,6 @@ class BatteryHostApiSetup {
     }
   }
 }
-/// Typed replacement for [BasicMessageChannel] `pdp.flutter.app/messages`.
-///
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol MessagesHostApi {
   func sendPing(ping: ApiChannelMessage) throws -> ApiChannelMessage
@@ -404,16 +445,29 @@ class PigeonEventSink<ReturnType> {
 
 }
 
-/// Typed replacement for [EventChannel] `pdp.flutter.app/connectivity`.
 class ConnectivityEventsStreamHandler: PigeonEventChannelWrapper<ApiConnectivityStatus> {
   static func register(with messenger: FlutterBinaryMessenger,
                       instanceName: String = "",
                       streamHandler: ConnectivityEventsStreamHandler) {
-    var channelName = "dev.flutter.pigeon.pdp_todo_app.ConnectivityEventApi.connectivityEvents"
+    var channelName = "dev.flutter.pigeon.pdp_todo_app.PlatformEventApi.connectivityEvents"
     if !instanceName.isEmpty {
       channelName += ".\(instanceName)"
     }
     let internalStreamHandler = PigeonStreamHandler<ApiConnectivityStatus>(wrapper: streamHandler)
+    let channel = FlutterEventChannel(name: channelName, binaryMessenger: messenger, codec: platformApisPigeonMethodCodec)
+    channel.setStreamHandler(internalStreamHandler)
+  }
+}
+      
+class OnMapClickStreamHandler: PigeonEventChannelWrapper<ApiMapClick> {
+  static func register(with messenger: FlutterBinaryMessenger,
+                      instanceName: String = "",
+                      streamHandler: OnMapClickStreamHandler) {
+    var channelName = "dev.flutter.pigeon.pdp_todo_app.PlatformEventApi.onMapClick"
+    if !instanceName.isEmpty {
+      channelName += ".\(instanceName)"
+    }
+    let internalStreamHandler = PigeonStreamHandler<ApiMapClick>(wrapper: streamHandler)
     let channel = FlutterEventChannel(name: channelName, binaryMessenger: messenger, codec: platformApisPigeonMethodCodec)
     channel.setStreamHandler(internalStreamHandler)
   }

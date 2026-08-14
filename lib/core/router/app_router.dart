@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
 import 'package:pdp_todo_app/features/messages/presentation/pages/messages_page.dart';
+import 'package:pdp_todo_app/features/native_map/presentation/bloc/map_cubit.dart';
+import 'package:pdp_todo_app/features/native_map/presentation/pages/native_map_page.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todo_details_cubit.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todo_form_cubit.dart';
@@ -13,11 +15,13 @@ import 'package:pdp_todo_app/features/todos/presentation/pages/todos_page.dart';
 
 typedef TodoFormCubitFactory = TodoFormCubit Function({Todo? initialTodo});
 typedef TodoDetailsCubitFactory = TodoDetailsCubit Function(String todoId);
+typedef MapCubitFactory = MapCubit Function();
 
 GoRouter createAppRouter({
   required Clock clock,
   required TodoFormCubitFactory createFormCubit,
   required TodoDetailsCubitFactory createDetailsCubit,
+  required MapCubitFactory createMapCubit,
   String initialLocation = AppRoutes.todos,
 }) {
   return GoRouter(
@@ -72,6 +76,13 @@ GoRouter createAppRouter({
       GoRoute(
         path: AppRoutes.messages,
         builder: (context, state) => const MessagesPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.nativeMap,
+        builder: (context, state) => BlocProvider(
+          create: (_) => createMapCubit(),
+          child: const NativeMapPage(),
+        ),
       ),
     ],
   );

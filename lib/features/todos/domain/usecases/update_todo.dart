@@ -17,16 +17,10 @@ class UpdateTodo {
     final updated = existing.copyWith(
       title: validated.title,
       description: validated.description,
-      priority: _priorityFrom(validated.priority),
+      priority: TodoPriority.fromName(validated.priority),
       dueDate: validated.dueDate,
       tags: validated.tags,
     );
     return _repository.updateTodo(updated);
   }
-
-  TodoPriority _priorityFrom(String value) => switch (value) {
-    'low' => TodoPriority.low,
-    'high' => TodoPriority.high,
-    _ => TodoPriority.medium,
-  };
 }

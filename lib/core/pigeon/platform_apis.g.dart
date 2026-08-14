@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show immutable, protected, visibleForTesting;
 
 Object? _extractReplyValueOrThrow(
-  List<Object?>? replyList,
-  String channelName, {
-  required bool isNullValid,
+    List<Object?>? replyList,
+    String channelName, {
+    required bool isNullValid,
 }) {
   if (replyList == null) {
     throw PlatformException(
@@ -46,9 +46,8 @@ bool _deepEquals(Object? a, Object? b) {
   }
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed.every(
-          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
-        );
+        a.indexed
+            .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
   }
   if (a is Map && b is Map) {
     if (a.length != b.length) {
@@ -97,6 +96,7 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
+
 enum ApiMessageType {
   ping,
   pong,
@@ -130,8 +130,7 @@ class ApiChannelMessage {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static ApiChannelMessage decode(Object result) {
     result as List<Object?>;
@@ -151,9 +150,7 @@ class ApiChannelMessage {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(type, other.type) &&
-        _deepEquals(id, other.id) &&
-        _deepEquals(payload, other.payload);
+    return _deepEquals(type, other.type) && _deepEquals(id, other.id) && _deepEquals(payload, other.payload);
   }
 
   @override
@@ -166,6 +163,57 @@ class ApiChannelMessage {
   }
 }
 
+class ApiMapClick {
+  ApiMapClick({
+    required this.latitude,
+    required this.longitude,
+  });
+
+  double latitude;
+
+  double longitude;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      latitude,
+      longitude,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ApiMapClick decode(Object result) {
+    result as List<Object?>;
+    return ApiMapClick(
+      latitude: result[0]! as double,
+      longitude: result[1]! as double,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ApiMapClick || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(latitude, other.latitude) && _deepEquals(longitude, other.longitude);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ApiMapClick(latitude: $latitude, longitude: $longitude)';
+  }
+}
+
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -173,14 +221,17 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    } else if (value is ApiMessageType) {
+    }    else if (value is ApiMessageType) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    } else if (value is ApiConnectivityStatus) {
+    }    else if (value is ApiConnectivityStatus) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    } else if (value is ApiChannelMessage) {
+    }    else if (value is ApiChannelMessage) {
       buffer.putUint8(131);
+      writeValue(buffer, value.encode());
+    }    else if (value is ApiMapClick) {
+      buffer.putUint8(132);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -198,28 +249,23 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : ApiConnectivityStatus.values[value];
       case 131:
         return ApiChannelMessage.decode(readValue(buffer)!);
+      case 132:
+        return ApiMapClick.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
   }
 }
 
-const StandardMethodCodec pigeonMethodCodec = StandardMethodCodec(
-  _PigeonCodec(),
-);
+const StandardMethodCodec pigeonMethodCodec = StandardMethodCodec(_PigeonCodec());
 
-/// Typed replacement for [MethodChannel] `pdp.flutter.app/battery`.
 class BatteryHostApi {
   /// Constructor for [BatteryHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  BatteryHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  BatteryHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -227,8 +273,7 @@ class BatteryHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<int> getBatteryLevel() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.pdp_todo_app.BatteryHostApi.getBatteryLevel$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.pdp_todo_app.BatteryHostApi.getBatteryLevel$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -238,26 +283,22 @@ class BatteryHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as int;
   }
 }
 
-/// Typed replacement for [BasicMessageChannel] `pdp.flutter.app/messages`.
 class MessagesHostApi {
   /// Constructor for [MessagesHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  MessagesHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+  MessagesHostApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -265,45 +306,56 @@ class MessagesHostApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<ApiChannelMessage> sendPing(ApiChannelMessage ping) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.pdp_todo_app.MessagesHostApi.sendPing$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.pdp_todo_app.MessagesHostApi.sendPing$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[ping],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ping]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as ApiChannelMessage;
   }
 }
 
-/// Typed replacement for [EventChannel] `pdp.flutter.app/connectivity`.
 /// Returns a broadcast [Stream] of events from the `connectivityEvents` event channel.
 ///
 /// Each call to this method creates a new [EventChannel], so it should
 /// not be called multiple times for the same `instanceName`. To deliver
 /// events to multiple listeners, call this method once and listen to the
 /// returned broadcast stream multiple times instead.
-Stream<ApiConnectivityStatus> connectivityEvents({String instanceName = ''}) {
+Stream<ApiConnectivityStatus> connectivityEvents( {String instanceName = ''}) {
   if (instanceName.isNotEmpty) {
     instanceName = '.$instanceName';
   }
-  final EventChannel connectivityEventsChannel = EventChannel(
-    'dev.flutter.pigeon.pdp_todo_app.ConnectivityEventApi.connectivityEvents$instanceName',
-    pigeonMethodCodec,
-  );
-  return connectivityEventsChannel.receiveBroadcastStream().map((
-    dynamic event,
-  ) {
+  final EventChannel connectivityEventsChannel =
+      EventChannel('dev.flutter.pigeon.pdp_todo_app.PlatformEventApi.connectivityEvents$instanceName', pigeonMethodCodec);
+  return connectivityEventsChannel.receiveBroadcastStream().map((dynamic event) {
     return event as ApiConnectivityStatus;
   });
 }
+    
+/// Returns a broadcast [Stream] of events from the `onMapClick` event channel.
+///
+/// Each call to this method creates a new [EventChannel], so it should
+/// not be called multiple times for the same `instanceName`. To deliver
+/// events to multiple listeners, call this method once and listen to the
+/// returned broadcast stream multiple times instead.
+Stream<ApiMapClick> onMapClick( {String instanceName = ''}) {
+  if (instanceName.isNotEmpty) {
+    instanceName = '.$instanceName';
+  }
+  final EventChannel onMapClickChannel =
+      EventChannel('dev.flutter.pigeon.pdp_todo_app.PlatformEventApi.onMapClick$instanceName', pigeonMethodCodec);
+  return onMapClickChannel.receiveBroadcastStream().map((dynamic event) {
+    return event as ApiMapClick;
+  });
+}
+    

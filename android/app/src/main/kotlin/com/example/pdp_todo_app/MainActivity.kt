@@ -6,11 +6,16 @@ import com.example.pdp_todo_app.native.BatteryChannel
 import com.example.pdp_todo_app.native.BatteryPigeonApi
 import com.example.pdp_todo_app.native.ConnectivityChannel
 import com.example.pdp_todo_app.native.ConnectivityPigeonStreamHandler
+import com.example.pdp_todo_app.native.MapPigeonStreamHandler
 import com.example.pdp_todo_app.native.MessagesChannel
 import com.example.pdp_todo_app.native.MessagesPigeonApi
+import com.example.pdp_todo_app.native.NativeMapViewFactory
 import com.example.pdp_todo_app.pigeon.BatteryHostApi
 import com.example.pdp_todo_app.pigeon.ConnectivityEventsStreamHandler
 import com.example.pdp_todo_app.pigeon.MessagesHostApi
+import com.example.pdp_todo_app.pigeon.OnMapClickStreamHandler
+import org.maplibre.android.MapLibre.getInstance
+import org.maplibre.android.WellKnownTileServer
 
 class MainActivity : FlutterActivity() {
 
@@ -20,11 +25,37 @@ class MainActivity : FlutterActivity() {
     private lateinit var batteryPigeonApi: BatteryPigeonApi
     private lateinit var messagesPigeonApi: MessagesPigeonApi
     private lateinit var connectivityPigeonStreamHandler: ConnectivityPigeonStreamHandler
+    private lateinit var mapViewFactory: NativeMapViewFactory
+    private lateinit var mapPigeonStreamHandler: MapPigeonStreamHandler
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        getInstance(
+            this,
+            null,
+            WellKnownTileServer.MapLibre
+        )
+
+        mapPigeonStreamHandler = MapPigeonStreamHandler()
+        mapViewFactory = NativeMapViewFactory(
+            this,
+            mapPigeonStreamHandler::emit,
+        )
+
+        flutterEngine
+            .platformViewsController
+            .registry
+            .registerViewFactory(
+                "native-map",
+                mapViewFactory
+            )
+
         val messenger = flutterEngine.dartExecutor.binaryMessenger
+        OnMapClickStreamHandler.register(
+            messenger,
+            mapPigeonStreamHandler
+        )
         batteryChannel = BatteryChannel(
             context = this,
             messenger = messenger

@@ -93,7 +93,7 @@ class _LoadedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final online = status != ConnectivityStatus.none;
+    final online = status.isOnline;
 
     return Row(
       children: [

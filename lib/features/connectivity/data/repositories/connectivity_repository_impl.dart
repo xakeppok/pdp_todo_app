@@ -14,13 +14,10 @@ class ConnectivityRepositoryImpl implements ConnectivityRepository {
   }
 
   ConnectivityStatus _mapStatus(String raw) {
-    return switch (raw) {
-      'wifi' => ConnectivityStatus.wifi,
-      'mobile' => ConnectivityStatus.mobile,
-      'none' => ConnectivityStatus.none,
-      _ => throw PlatformFailure(
-        'Unknown connectivity status: $raw',
-      ),
-    };
+    final status = ConnectivityStatus.tryParse(raw);
+    if (status == null) {
+      throw PlatformFailure('Unknown connectivity status: $raw');
+    }
+    return status;
   }
 }

@@ -6,11 +6,19 @@ class ThemeCubit extends Cubit<ThemeMode> {
 
   void setMode(ThemeMode mode) => emit(mode);
 
-  void cycle() {
-    emit(switch (state) {
-      ThemeMode.system => ThemeMode.light,
-      ThemeMode.light => ThemeMode.dark,
-      ThemeMode.dark => ThemeMode.system,
-    });
-  }
+  void cycle() => emit(state.next);
+}
+
+extension ThemeModeX on ThemeMode {
+  ThemeMode get next => switch (this) {
+    ThemeMode.system => ThemeMode.light,
+    ThemeMode.light => ThemeMode.dark,
+    ThemeMode.dark => ThemeMode.system,
+  };
+
+  String get label => switch (this) {
+    ThemeMode.system => 'system',
+    ThemeMode.light => 'light',
+    ThemeMode.dark => 'dark',
+  };
 }

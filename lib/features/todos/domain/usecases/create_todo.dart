@@ -18,17 +18,11 @@ class CreateTodo {
       id: id,
       title: validated.title,
       description: validated.description,
-      priority: _priorityFrom(validated.priority),
+      priority: TodoPriority.fromName(validated.priority),
       dueDate: validated.dueDate,
       completed: false,
       tags: validated.tags,
     );
     return _repository.createTodo(todo);
   }
-
-  TodoPriority _priorityFrom(String value) => switch (value) {
-    'low' => TodoPriority.low,
-    'high' => TodoPriority.high,
-    _ => TodoPriority.medium,
-  };
 }

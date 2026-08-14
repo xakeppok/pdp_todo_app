@@ -2,6 +2,7 @@ abstract final class AppRoutes {
   static const root = '/';
   static const todos = '/todos';
   static const messages = '/messages';
+  static const nativeMap = '/native-map';
 
   static const createRelative = 'create';
   static const idRelative = ':id';

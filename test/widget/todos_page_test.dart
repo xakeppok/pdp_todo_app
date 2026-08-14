@@ -7,6 +7,7 @@ import 'package:pdp_todo_app/core/clock/clock.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
 import 'package:pdp_todo_app/features/messages/presentation/messages_keys.dart';
+import 'package:pdp_todo_app/features/native_map/presentation/native_map_keys.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_filter.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_sort.dart';
@@ -264,6 +265,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(navigated, AppRoutes.messages);
     expect(find.byKey(MessagesKeys.page), findsOneWidget);
+  });
+
+  testWidgets('native map button opens native map route', (tester) async {
+    String? navigated;
+    when(() => getTodos()).thenAnswer((_) async => buildTodoList());
+    final bloc = createBloc()..add(const TodosLoadRequested());
+    await pumpTodosPage(
+      tester,
+      bloc: bloc,
+      clock: clock,
+      onNavigate: (location) => navigated = location,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(NativeMapKeys.openButton));
+    await tester.pumpAndSettle();
+    expect(navigated, AppRoutes.nativeMap);
+    expect(find.byKey(NativeMapKeys.page), findsOneWidget);
   });
 
   testWidgets('dark theme smoke on list', (tester) async {

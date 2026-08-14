@@ -1,4 +1,5 @@
 import 'package:pdp_todo_app/core/error/failures.dart';
+import 'package:pdp_todo_app/features/todos/domain/entities/todo_priority.dart';
 
 class TodoInput {
   const TodoInput({
@@ -50,7 +51,7 @@ class TodoValidator {
 
     final dueDate = parseDateOnly(input.dueDateInput);
     final priority = input.priority.trim().toLowerCase();
-    if (priority != 'low' && priority != 'medium' && priority != 'high') {
+    if (TodoPriority.tryParse(priority) == null) {
       throw const ValidationFailure('Priority must be low, medium, or high');
     }
 

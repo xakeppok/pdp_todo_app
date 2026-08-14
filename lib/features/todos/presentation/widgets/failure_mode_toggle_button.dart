@@ -27,30 +27,26 @@ class _FailureModeToggleButtonState extends State<FailureModeToggleButton> {
   void _cycle() {
     if (!getIt.isRegistered<TodoDataSource>()) return;
 
-    final next = switch (_mode) {
-      FailureMode.none => FailureMode.throwOnWrite,
-      FailureMode.throwOnWrite => FailureMode.throwOnGet,
-      FailureMode.throwOnGet => FailureMode.none,
-    };
+    final next = _mode.next;
     setDataSourceFailureMode(next);
     setState(() => _mode = next);
 
-    context.showSnackBarMessage('FailureMode: ${next.name}');
+    context.showSnackBarMessage('FailureMode: ${next.label}');
   }
 
   @override
   Widget build(BuildContext context) {
     if (!kDebugMode) return const SizedBox.shrink();
 
-    final (icon, tooltip) = switch (_mode) {
-      FailureMode.none => (Icons.bug_report_outlined, 'Failures: off'),
-      FailureMode.throwOnWrite => (Icons.edit_off, 'Failures: writes'),
-      FailureMode.throwOnGet => (Icons.cloud_off, 'Failures: reads'),
+    final icon = switch (_mode) {
+      FailureMode.none => Icons.bug_report_outlined,
+      FailureMode.throwOnWrite => Icons.edit_off,
+      FailureMode.throwOnGet => Icons.cloud_off,
     };
 
     return IconButton(
       key: TodosKeys.failureModeToggle,
-      tooltip: tooltip,
+      tooltip: 'Failures: ${_mode.label}',
       icon: Icon(icon),
       onPressed: _cycle,
     );

@@ -1,13 +1,12 @@
 import 'package:equatable/equatable.dart';
 
 enum ChannelMessageType {
-  ping,
-  pong;
+  ping('ping'),
+  pong('pong');
 
-  String get label => switch (this) {
-    ChannelMessageType.ping => 'ping',
-    ChannelMessageType.pong => 'pong',
-  };
+  const ChannelMessageType(this.label);
+
+  final String label;
 }
 
 class ChannelMessage extends Equatable {

@@ -18,19 +18,32 @@ Cheat sheet (pyramid, tools, **what to test where**, snippets): [docs/testing-st
 
 Platform channels (architecture, codecs, threading, **which channel**, snippets, edge cases): [docs/platform-channels.md](docs/platform-channels.md)
 
+Platform interop wiki + knowledge-sharing session (MethodChannel, EventChannel, BasicMessageChannel, Pigeon, Platform Views, runnable demos): [docs/platform-interop.md](docs/platform-interop.md)
+
 Goldens (generate / update / review): [docs/goldens.md](docs/goldens.md)
 
 ## Platform channels
 
-Three native conversations, each with a manual channel **and** a Pigeon twin. DI registers one `*DataSource` impl; both native hosts are wired.
+Four native conversations. Battery, connectivity, and messages each have a manual channel **and** a Pigeon twin. The map is a Platform View plus a Pigeon click stream. DI registers one `*DataSource` impl; both native hosts (where a twin exists) are wired.
 
 | Feature | Manual channel | Conversation | Pigeon |
 |---------|----------------|--------------|--------|
 | Battery | `MethodChannel` `pdp.flutter.app/battery` | one-shot `getBatteryLevel` → `int` | `@HostApi` `BatteryHostApi` |
 | Connectivity | `EventChannel` `pdp.flutter.app/connectivity` | stream `'wifi' \| 'mobile' \| 'none'` | `@EventChannelApi` `connectivityEvents()` |
 | Messages | `BasicMessageChannel` `pdp.flutter.app/messages` | ping `Map` → pong `Map` | `@HostApi` `MessagesHostApi` + DTO |
+| Native map | Platform View `native-map` | MapLibre view + tap lat/lng | `@EventChannelApi` `onMapClick()` |
 
 Codecs, threading (main-thread event sink), **which channel**, annotated snippets, and edge cases (missing plugin, codec type failures, backgrounding): [docs/platform-channels.md](docs/platform-channels.md).
+
+Session wiki (use-case boundaries, Platform Views, live demo script): [docs/platform-interop.md](docs/platform-interop.md).
+
+Regenerate Dart / Kotlin / Swift after editing `pigeons/platform_apis.dart`:
+
+```bash
+dart run pigeon --input pigeons/platform_apis.dart
+```
+
+Do not edit `*.g.dart` / `*.g.kt` / `*.g.swift`.
 
 ## Setup
 
@@ -133,10 +146,14 @@ lib/
     data/        # BasicMessageChannel / pigeon HostApi + repository
     domain/      # port + SendPing
     presentation/# MessagesCubit, messages page
+  features/native_map/
+    data/        # Pigeon click stream + repository
+    domain/      # port + WatchMapClicks
+    presentation/# MapCubit, AndroidView / UiKitView page
 pigeons/         # Pigeon contract (not compiled into the app)
 ```
 
-`get_it` only in `lib/app/di.dart` and the integration harness. Pages and `app_router.dart` don't call it — router comes from `createConfiguredRouter()`.
+`get_it` is wired in `lib/app/di.dart`. `TodoApp` and `FailureModeToggleButton` also call it. Router comes from `createConfiguredRouter()`.
 
 ## Stack
 
@@ -150,5 +167,6 @@ pigeons/         # Pigeon contract (not compiled into the app)
 
 - [Testing cheat sheet](docs/testing-strategy.md) — pyramid, tools, decision guide, snippets
 - [Platform channels](docs/platform-channels.md) — architecture, codecs, threading, which channel, snippets, edge cases
+- [Platform interop session](docs/platform-interop.md) — wiki + 90 min knowledge-sharing: channels, Pigeon, Platform Views, demos
 - [Goldens](docs/goldens.md) — generate, update, review
 - [CI and flaky tests](docs/ci-and-flaky-tests.md)

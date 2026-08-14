@@ -129,7 +129,16 @@ class TodoFormCubit extends Cubit<TodoFormState> {
   }
 }
 
-enum TodoFormStatus { idle, submitting, success, failure }
+enum TodoFormStatus {
+  idle,
+  submitting,
+  success,
+  failure;
+
+  bool get isSubmitting => this == TodoFormStatus.submitting;
+  bool get isSuccess => this == TodoFormStatus.success;
+  bool get isFailure => this == TodoFormStatus.failure;
+}
 
 class TodoFormState extends Equatable {
   const TodoFormState({

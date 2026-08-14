@@ -9,7 +9,8 @@ import UIKit
     private var batteryPigeonApi: BatteryPigeonApi?
     private var messagesPigeonApi: MessagesPigeonApi?
     private var connectivityPigeonStreamHandler: ConnectivityPigeonStreamHandler?
-    
+    private var mapPigeonStreamHandler: MapPigeonStreamHandler?
+
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -39,5 +40,19 @@ import UIKit
             streamHandler: connectivityPigeonStreamHandler
         )
         self.connectivityPigeonStreamHandler = connectivityPigeonStreamHandler
+
+        let mapPigeonStreamHandler = MapPigeonStreamHandler()
+        OnMapClickStreamHandler.register(
+            with: messenger,
+            streamHandler: mapPigeonStreamHandler
+        )
+        engineBridge.applicationRegistrar.register(
+            NativeMapViewFactory { latitude, longitude in
+                mapPigeonStreamHandler.emit(latitude: latitude, longitude: longitude)
+            },
+            withId: "native-map",
+            gestureRecognizersBlockingPolicy: FlutterPlatformViewGestureRecognizersBlockingPolicyEager
+        )
+        self.mapPigeonStreamHandler = mapPigeonStreamHandler
     }
 }

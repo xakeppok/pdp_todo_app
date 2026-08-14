@@ -8,6 +8,7 @@ import 'package:pdp_todo_app/core/widgets/snack_bar_listener.dart';
 import 'package:pdp_todo_app/features/battery/presentation/widgets/battery_widget.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/widgets/connectivity_widget.dart';
 import 'package:pdp_todo_app/features/messages/presentation/messages_keys.dart';
+import 'package:pdp_todo_app/features/native_map/presentation/native_map_keys.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 import 'package:pdp_todo_app/features/todos/presentation/todos_keys.dart';
 import 'package:pdp_todo_app/features/todos/presentation/widgets/failure_mode_toggle_button.dart';
@@ -40,6 +41,12 @@ class TodosPage extends StatelessWidget {
               tooltip: 'Messages channel',
               onPressed: () => context.push(AppRoutes.messages),
               icon: const Icon(Icons.sync_alt_rounded),
+            ),
+            IconButton(
+              key: NativeMapKeys.openButton,
+              tooltip: 'Native map',
+              onPressed: () => context.push(AppRoutes.nativeMap),
+              icon: const Icon(Icons.map_rounded),
             ),
             const FailureModeToggleButton(),
             const ThemeToggleButton(),

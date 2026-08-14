@@ -1,9 +1,19 @@
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 
 enum FailureMode {
-  none,
-  throwOnGet,
-  throwOnWrite,
+  none('off'),
+  throwOnGet('reads'),
+  throwOnWrite('writes');
+
+  const FailureMode(this.label);
+
+  final String label;
+
+  FailureMode get next => switch (this) {
+    FailureMode.none => FailureMode.throwOnWrite,
+    FailureMode.throwOnWrite => FailureMode.throwOnGet,
+    FailureMode.throwOnGet => FailureMode.none,
+  };
 }
 
 abstract class TodoDataSource {
