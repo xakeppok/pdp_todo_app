@@ -23,6 +23,7 @@ class ConnectivityPigeonStreamHandler(
     private var callback: ConnectivityManager.NetworkCallback? = null
 
     override fun onListen(p0: Any?, sink: PigeonEventSink<ApiConnectivityStatus>) {
+        unregisterCallback()
         eventSink = sink
         emitStatus()
 
@@ -44,31 +45,31 @@ class ConnectivityPigeonStreamHandler(
     }
 
     override fun onCancel(p0: Any?) {
-        callback?.let(connectivityManager::unregisterNetworkCallback)
-        callback = null
+        unregisterCallback()
         eventSink = null
     }
 
+    fun dispose() {
+        onCancel(null)
+    }
+
+    private fun unregisterCallback() {
+        callback?.let(connectivityManager::unregisterNetworkCallback)
+        callback = null
+    }
+
     private fun emitStatus() {
-        val status = currentStatus()
+        val status = connectivityManager.appConnectivityStatus().toPigeon()
         mainHandler.post {
             eventSink?.success(status)
         }
     }
+}
 
-    private fun currentStatus(): ApiConnectivityStatus {
-        val network = connectivityManager.activeNetwork
-            ?: return ApiConnectivityStatus.NONE
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(network)
-                ?: return ApiConnectivityStatus.NONE
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ->
-                ApiConnectivityStatus.WIFI
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ->
-                ApiConnectivityStatus.MOBILE
-            else -> ApiConnectivityStatus.NONE
-        }
+private fun AppConnectivityStatus.toPigeon(): ApiConnectivityStatus {
+    return when (this) {
+        AppConnectivityStatus.WIFI -> ApiConnectivityStatus.WIFI
+        AppConnectivityStatus.MOBILE -> ApiConnectivityStatus.MOBILE
+        AppConnectivityStatus.NONE -> ApiConnectivityStatus.NONE
     }
 }

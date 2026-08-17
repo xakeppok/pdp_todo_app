@@ -83,10 +83,19 @@ class TodoDetailsCubit extends Cubit<TodoDetailsState> {
     emit(const TodoDetailsLoading());
     try {
       final todo = await getTodoById(todoId);
+      if (isClosed) {
+        return;
+      }
       emit(TodoDetailsLoaded(todo: todo));
     } on Failure catch (failure) {
+      if (isClosed) {
+        return;
+      }
       emit(TodoDetailsError(failure.message));
     } on Object catch (error) {
+      if (isClosed) {
+        return;
+      }
       emit(TodoDetailsError(error.toString()));
     }
   }
@@ -97,10 +106,19 @@ class TodoDetailsCubit extends Cubit<TodoDetailsState> {
 
     try {
       final updated = await toggleTodoCompletion(current.todo);
+      if (isClosed) {
+        return;
+      }
       emit(TodoDetailsLoaded(todo: updated));
     } on Failure catch (failure) {
+      if (isClosed) {
+        return;
+      }
       emit(current.copyWith(actionMessage: failure.message));
     } on Object catch (error) {
+      if (isClosed) {
+        return;
+      }
       emit(current.copyWith(actionMessage: error.toString()));
     }
   }
@@ -111,10 +129,19 @@ class TodoDetailsCubit extends Cubit<TodoDetailsState> {
 
     try {
       await deleteTodo(current.todo.id);
+      if (isClosed) {
+        return;
+      }
       emit(TodoDetailsDeleted(current.todo.id));
     } on Failure catch (failure) {
+      if (isClosed) {
+        return;
+      }
       emit(current.copyWith(actionMessage: failure.message));
     } on Object catch (error) {
+      if (isClosed) {
+        return;
+      }
       emit(current.copyWith(actionMessage: error.toString()));
     }
   }

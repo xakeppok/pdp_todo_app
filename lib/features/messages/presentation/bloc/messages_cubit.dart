@@ -6,9 +6,10 @@ import 'package:pdp_todo_app/features/messages/presentation/bloc/messages_state.
 
 class MessagesCubit extends Cubit<MessagesState> {
   MessagesCubit({
-    required this._sendPing,
+    required SendPing sendPing,
     String Function()? idFactory,
-  }) : _idFactory = idFactory ?? _defaultIdFactory,
+  }) : _sendPing = sendPing,
+       _idFactory = idFactory ?? _defaultIdFactory,
        super(const MessagesInitial());
 
   static String _defaultIdFactory() =>

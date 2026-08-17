@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
-import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_platform_datasource.dart';
+import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_platform_data_source.dart';
 
 import '../helpers/mock_connectivity_channel.dart';
 

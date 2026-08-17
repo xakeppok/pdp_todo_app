@@ -30,6 +30,7 @@ class ConnectivityChannel(
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
+        unregisterCallback()
         eventSink = events
         emitStatus()
 
@@ -51,27 +52,24 @@ class ConnectivityChannel(
     }
 
     override fun onCancel(arguments: Any?) {
-        callback?.let(connectivityManager::unregisterNetworkCallback)
-        callback = null
+        unregisterCallback()
         eventSink = null
     }
 
-    private fun emitStatus() {
-        val status = currentStatus()
-        mainHandler.post {
-            eventSink?.success(status)
-        }
+    fun dispose() {
+        onCancel(null)
+        channel.setStreamHandler(null)
     }
 
-    private fun currentStatus(): String {
-        val network = connectivityManager.activeNetwork ?: return "none"
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(network) ?: return "none"
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "wifi"
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "mobile"
-            else -> "none"
+    private fun unregisterCallback() {
+        callback?.let(connectivityManager::unregisterNetworkCallback)
+        callback = null
+    }
+
+    private fun emitStatus() {
+        val status = connectivityManager.appConnectivityStatus().channelValue
+        mainHandler.post {
+            eventSink?.success(status)
         }
     }
 }

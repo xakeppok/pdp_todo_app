@@ -20,12 +20,13 @@ final class ConnectivityChannel: NSObject, FlutterStreamHandler {
         withArguments arguments: Any?,
         eventSink events: @escaping FlutterEventSink
     ) -> FlutterError? {
+        stopMonitor()
         eventSink = events
         let monitor = NWPathMonitor()
         self.monitor = monitor
         monitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
-                self?.eventSink?(self?.status(for: path) ?? "none")
+                self?.eventSink?(AppConnectivityStatus.from(path: path).channelValue)
             }
         }
         monitor.start(queue: DispatchQueue(label: "pdp.connectivity"))
@@ -33,22 +34,13 @@ final class ConnectivityChannel: NSObject, FlutterStreamHandler {
     }
 
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        monitor?.cancel()
-        monitor = nil
+        stopMonitor()
         eventSink = nil
         return nil
     }
 
-    private func status(for path: NWPath) -> String {
-        guard path.status == .satisfied else {
-            return "none"
-        }
-        if path.usesInterfaceType(.wifi) || path.usesInterfaceType(.wiredEthernet) {
-            return "wifi"
-        }
-        if path.usesInterfaceType(.cellular) {
-            return "mobile"
-        }
-        return "none"
+    private func stopMonitor() {
+        monitor?.cancel()
+        monitor = nil
     }
 }

@@ -2,6 +2,7 @@ import AppIntents
 import Foundation
 import WidgetKit
 
+/// Keep keys in sync with Dart `TodoWidgetContract`.
 enum TodoWidgetConfig {
     static let appGroupId = "group.com.example.pdpTodoApp"
     static let kind = "TodoWidget"

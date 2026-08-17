@@ -2,18 +2,13 @@ import UIKit
 
 final class BatteryPigeonApi: BatteryHostApi {
     func getBatteryLevel() throws -> Int64 {
-        UIDevice.current.isBatteryMonitoringEnabled = true
-
-        let batteryLevel = UIDevice.current.batteryLevel
-
-        if batteryLevel >= 0 {
-            return Int64(batteryLevel * 100)
+        guard let batteryLevel = BatteryLevelReader.capacityPercent() else {
+            throw PigeonError(
+                code: "UNAVAILABLE",
+                message: "Battery level not available.",
+                details: nil
+            )
         }
-
-        throw PigeonError(
-            code: "UNAVAILABLE",
-            message: "Battery level not available.",
-            details: nil
-        )
+        return Int64(batteryLevel)
     }
 }

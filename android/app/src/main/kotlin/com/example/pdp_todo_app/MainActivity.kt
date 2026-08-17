@@ -1,7 +1,5 @@
 package com.example.pdp_todo_app
 
-import io.flutter.embedding.android.FlutterActivity
-import io.flutter.embedding.engine.FlutterEngine
 import android.content.Intent
 import com.example.pdp_todo_app.native.BatteryChannel
 import com.example.pdp_todo_app.native.BatteryPigeonApi
@@ -15,6 +13,8 @@ import com.example.pdp_todo_app.pigeon.BatteryHostApi
 import com.example.pdp_todo_app.pigeon.ConnectivityEventsStreamHandler
 import com.example.pdp_todo_app.pigeon.MessagesHostApi
 import com.example.pdp_todo_app.pigeon.OnMapClickStreamHandler
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
 import org.maplibre.android.MapLibre.getInstance
 import org.maplibre.android.WellKnownTileServer
 
@@ -78,21 +78,18 @@ class MainActivity : FlutterActivity() {
         )
     }
 
-    override fun getInitialRoute(): String? {
-        return widgetRoute(intent) ?: super.getInitialRoute()
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        if (::connectivityChannel.isInitialized) {
+            connectivityChannel.dispose()
+        }
+        if (::connectivityPigeonStreamHandler.isInitialized) {
+            connectivityPigeonStreamHandler.dispose()
+        }
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        val route = widgetRoute(intent) ?: return
-        flutterEngine?.navigationChannel?.pushRoute(route)
-    }
-
-    private fun widgetRoute(intent: Intent?): String? {
-        val uri = intent?.data ?: return null
-        if (uri.scheme != "todowidget") return null
-        val path = uri.path
-        return if (path.isNullOrEmpty() || path == "/") "/todos" else path
     }
 }

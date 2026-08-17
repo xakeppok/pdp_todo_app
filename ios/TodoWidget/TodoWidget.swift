@@ -17,18 +17,6 @@ enum TodoWidgetStyle {
     }
 }
 
-struct WidgetTodo: Identifiable {
-    let id: String
-    let title: String
-    let completed: Bool
-}
-
-struct TodoEntry: TimelineEntry {
-    let date: Date
-    let todos: [WidgetTodo]
-    let total: Int
-}
-
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> TodoEntry {
         TodoEntry(date: Date(), todos: [
@@ -38,68 +26,13 @@ struct Provider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TodoEntry) -> Void) {
-        completion(loadEntry())
+        completion(TodoWidgetTimeline.loadEntry())
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TodoEntry>) -> Void) {
-        let timeline = Timeline(entries: [loadEntry()], policy: .never)
+        let timeline = Timeline(entries: [TodoWidgetTimeline.loadEntry()], policy: .never)
         completion(timeline)
     }
-}
-
-func loadEntry() -> TodoEntry {
-    let todos = loadTodos()
-    return TodoEntry(date: Date(), todos: todos, total: loadTotal(fallback: todos.count))
-}
-
-func loadTodos() -> [WidgetTodo] {
-    let defaults = UserDefaults(suiteName: TodoWidgetConfig.appGroupId)
-    guard let json = defaults?.string(forKey: TodoWidgetConfig.widgetTodosKey),
-          let data = json.data(using: .utf8),
-          let raw = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
-    else {
-        return []
-    }
-
-    return raw.prefix(TodoWidgetConfig.widgetLimit).compactMap { item in
-        guard let id = item["id"] as? String, !id.isEmpty,
-              let title = item["title"] as? String, !title.isEmpty
-        else {
-            return nil
-        }
-        return WidgetTodo(
-            id: id,
-            title: title,
-            completed: TodoWidgetStore.jsonBool(item["completed"])
-        )
-    }
-}
-
-func loadTotal(fallback: Int) -> Int {
-    let defaults = UserDefaults(suiteName: TodoWidgetConfig.appGroupId)
-    if let number = defaults?.object(forKey: TodoWidgetConfig.todosTotalKey) as? NSNumber {
-        return number.intValue
-    }
-    return fallback
-}
-
-func listURL() -> URL {
-    URL(string: "todowidget://app/todos")!
-}
-
-func visibleTodoCount(family: WidgetFamily, total: Int) -> Int {
-    let maxVisible: Int
-    switch family {
-    case .systemSmall:
-        maxVisible = 2
-    case .systemMedium:
-        maxVisible = 3
-    case .systemLarge, .systemExtraLarge:
-        maxVisible = 8
-    default:
-        maxVisible = 2
-    }
-    return min(total, maxVisible)
 }
 
 struct TodoWidgetEntryView: View {
@@ -112,19 +45,19 @@ struct TodoWidgetEntryView: View {
     private var openCount: Int { entry.todos.filter { !$0.completed }.count }
 
     var body: some View {
-        let remaining = max(entry.total - visibleTodoCount(family: family, total: todos.count), 0)
+        let remaining = max(entry.total - TodoWidgetTimeline.visibleTodoCount(family: family, total: todos.count), 0)
 
         VStack(alignment: .leading, spacing: family == .systemSmall ? 8 : 10) {
-            Link(destination: listURL()) {
+            Link(destination: TodoWidgetTimeline.listURL) {
                 header(remaining: remaining)
             }
 
             if todos.isEmpty {
-                Link(destination: listURL()) {
+                Link(destination: TodoWidgetTimeline.listURL) {
                     emptyState
                 }
             } else {
-                let visibleCount = visibleTodoCount(family: family, total: todos.count)
+                let visibleCount = TodoWidgetTimeline.visibleTodoCount(family: family, total: todos.count)
                 VStack(alignment: .leading, spacing: family == .systemSmall ? 6 : 8) {
                     slot(0, count: visibleCount)
                     slot(1, count: visibleCount)

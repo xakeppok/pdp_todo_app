@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:pdp_todo_app/core/clock/iso_date.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_priority.dart';
 
@@ -20,7 +21,7 @@ class TodoModel {
       title: todo.title,
       description: todo.description,
       priority: todo.priority.name,
-      dueDate: _formatDate(todo.dueDate),
+      dueDate: IsoDate.format(todo.dueDate),
       completed: todo.completed,
       tags: List<String>.from(todo.tags),
     );
@@ -79,7 +80,7 @@ class TodoModel {
       priority: priority ?? this.priority,
       dueDate: dueDate ?? this.dueDate,
       completed: completed ?? this.completed,
-      tags: tags ?? this.tags,
+      tags: List<String>.from(tags ?? this.tags),
     );
   }
 
@@ -121,12 +122,6 @@ class TodoModel {
           'completed': todo.completed,
         },
     ]);
-  }
-
-  static String _formatDate(DateTime date) {
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '${date.year}-$month-$day';
   }
 
   static bool _readCompleted(Object? value) {

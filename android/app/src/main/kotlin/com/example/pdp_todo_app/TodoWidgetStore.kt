@@ -9,6 +9,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.min
 
+/** Keep keys in sync with Dart `TodoWidgetContract`. */
 internal object TodoWidgetStore {
     const val TODOS_KEY = "todos"
     const val WIDGET_TODOS_KEY = "widget_todos"

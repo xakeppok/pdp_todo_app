@@ -46,6 +46,14 @@ void main() {
     );
   });
 
+  test('copyWith clones tags so later mutation is isolated', () {
+    final original = todo.copyWith();
+    original.tags.add('mutated');
+
+    expect(todo.tags, ['testing', 'domain']);
+    expect(original.tags, ['testing', 'domain', 'mutated']);
+  });
+
   test('reads completed flags written by native widgets', () {
     const raw = '''
 [

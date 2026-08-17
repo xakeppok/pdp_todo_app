@@ -24,13 +24,22 @@ class BatteryCubit extends Cubit<BatteryState> {
   }
 
   Future<void> getBatteryLevel() async {
+    if (isClosed) {
+      return;
+    }
     if (state is! BatteryLoaded) {
       emit(const BatteryLoading());
     }
     try {
       final batteryLevel = await _getBatteryLevel();
+      if (isClosed) {
+        return;
+      }
       emit(BatteryLoaded(batteryLevel));
     } on Failure catch (e) {
+      if (isClosed) {
+        return;
+      }
       emit(BatteryError(e.message));
     }
   }

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pdp_todo_app/core/clock/iso_date.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo.dart';
 import 'package:pdp_todo_app/features/todos/domain/entities/todo_priority.dart';
@@ -22,7 +23,7 @@ class TodoFormCubit extends Cubit<TodoFormState> {
            priority: initialTodo?.priority ?? TodoPriority.medium,
            dueDateInput: initialTodo == null
                ? ''
-               : _formatDate(initialTodo.dueDate),
+               : IsoDate.format(initialTodo.dueDate),
            tagsInput: initialTodo?.tags.join(', ') ?? '',
            isEditing: initialTodo != null,
          ),
@@ -75,6 +76,9 @@ class TodoFormCubit extends Cubit<TodoFormState> {
       } else {
         result = await _updateTodo(existing: _initialTodo, input: input);
       }
+      if (isClosed) {
+        return;
+      }
       emit(
         state.copyWith(
           status: TodoFormStatus.success,
@@ -82,6 +86,9 @@ class TodoFormCubit extends Cubit<TodoFormState> {
         ),
       );
     } on ValidationFailure catch (failure) {
+      if (isClosed) {
+        return;
+      }
       emit(
         state.copyWith(
           status: TodoFormStatus.failure,
@@ -90,6 +97,9 @@ class TodoFormCubit extends Cubit<TodoFormState> {
         ),
       );
     } on Failure catch (failure) {
+      if (isClosed) {
+        return;
+      }
       emit(
         state.copyWith(
           status: TodoFormStatus.failure,
@@ -97,6 +107,9 @@ class TodoFormCubit extends Cubit<TodoFormState> {
         ),
       );
     } on Object catch (error) {
+      if (isClosed) {
+        return;
+      }
       emit(
         state.copyWith(
           status: TodoFormStatus.failure,
@@ -121,12 +134,6 @@ class TodoFormCubit extends Cubit<TodoFormState> {
   }
 
   static String _defaultId() => 'todo-${DateTime.now().microsecondsSinceEpoch}';
-
-  static String _formatDate(DateTime date) {
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '${date.year}-$month-$day';
-  }
 }
 
 enum TodoFormStatus {

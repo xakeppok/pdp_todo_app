@@ -1,3 +1,4 @@
+import 'package:pdp_todo_app/core/async/async_mutex.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 import 'package:pdp_todo_app/features/todos/data/services/home_widget_todo_service.dart';
@@ -51,6 +52,7 @@ class HomeWidgetTodoDataSource implements TodoDataSource {
 
   final HomeWidgetTodoService _service;
   final List<TodoModel> _seed;
+  final AsyncMutex _mutex = AsyncMutex();
   FailureMode _failureMode;
 
   @override
@@ -60,60 +62,70 @@ class HomeWidgetTodoDataSource implements TodoDataSource {
   set failureMode(FailureMode value) => _failureMode = value;
 
   @override
-  Future<List<TodoModel>> getTodos() async {
-    _maybeThrowGet();
-    final todos = await _loadOrSeed();
-    return [for (final todo in todos) todo.copyWith()];
+  Future<List<TodoModel>> getTodos() {
+    return _mutex.run(() async {
+      _maybeThrowGet();
+      final todos = await _loadOrSeed();
+      return [for (final todo in todos) todo.copyWith()];
+    });
   }
 
   @override
-  Future<TodoModel> getTodoById(String id) async {
-    _maybeThrowGet();
-    final todo = _byId(await _loadOrSeed())[id];
-    if (todo == null) {
-      throw DataSourceException('Todo $id not found');
-    }
-    return todo.copyWith();
+  Future<TodoModel> getTodoById(String id) {
+    return _mutex.run(() async {
+      _maybeThrowGet();
+      final todo = _byId(await _loadOrSeed())[id];
+      if (todo == null) {
+        throw DataSourceException.notFound(id);
+      }
+      return todo.copyWith();
+    });
   }
 
   @override
-  Future<TodoModel> createTodo(TodoModel todo) async {
-    _maybeThrowWrite();
-    final todos = await _loadOrSeed();
-    if (_byId(todos).containsKey(todo.id)) {
-      throw DataSourceException('Todo ${todo.id} already exists');
-    }
-    final created = todo.copyWith();
-    await _persist([...todos, created]);
-    return created.copyWith();
+  Future<TodoModel> createTodo(TodoModel todo) {
+    return _mutex.run(() async {
+      _maybeThrowWrite();
+      final todos = await _loadOrSeed();
+      if (_byId(todos).containsKey(todo.id)) {
+        throw DataSourceException.alreadyExists(todo.id);
+      }
+      final created = todo.copyWith();
+      await _persist([...todos, created]);
+      return created.copyWith();
+    });
   }
 
   @override
-  Future<TodoModel> updateTodo(TodoModel todo) async {
-    _maybeThrowWrite();
-    final todos = await _loadOrSeed();
-    if (!_byId(todos).containsKey(todo.id)) {
-      throw DataSourceException('Todo ${todo.id} not found');
-    }
-    final updated = todo.copyWith();
-    await _persist([
-      for (final item in todos)
-        if (item.id == updated.id) updated else item,
-    ]);
-    return updated.copyWith();
+  Future<TodoModel> updateTodo(TodoModel todo) {
+    return _mutex.run(() async {
+      _maybeThrowWrite();
+      final todos = await _loadOrSeed();
+      if (!_byId(todos).containsKey(todo.id)) {
+        throw DataSourceException.notFound(todo.id);
+      }
+      final updated = todo.copyWith();
+      await _persist([
+        for (final item in todos)
+          if (item.id == updated.id) updated else item,
+      ]);
+      return updated.copyWith();
+    });
   }
 
   @override
-  Future<void> deleteTodo(String id) async {
-    _maybeThrowWrite();
-    final todos = await _loadOrSeed();
-    if (!_byId(todos).containsKey(id)) {
-      throw DataSourceException('Todo $id not found');
-    }
-    await _persist([
-      for (final todo in todos)
-        if (todo.id != id) todo,
-    ]);
+  Future<void> deleteTodo(String id) {
+    return _mutex.run(() async {
+      _maybeThrowWrite();
+      final todos = await _loadOrSeed();
+      if (!_byId(todos).containsKey(id)) {
+        throw DataSourceException.notFound(id);
+      }
+      await _persist([
+        for (final todo in todos)
+          if (todo.id != id) todo,
+      ]);
+    });
   }
 
   Future<List<TodoModel>> _loadOrSeed() async {

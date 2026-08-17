@@ -11,7 +11,7 @@ Two stacks sit side by side. Native hosts for both are registered. Dart DI picks
 | Manual | `*PlatformDataSource` | `*Channel.kt` / `*Channel.swift` | `pdp.flutter.app/{battery,connectivity,messages}` |
 | Pigeon | `*PigeonDataSource` | `*PigeonApi.kt` / `*PigeonApi.swift` | `dev.flutter.pigeon.pdp_todo_app.*` (generated) |
 
-Swap in `lib/app/di.dart` only, e.g. `BatteryPigeonDataSource.new` vs `BatteryPlatformDataSource.new`. Cubit / use case / repository stay on the data-source interface.
+Swap in `lib/app/di.dart` only via `usePigeonPlatformApis`. Cubit / use case / repository stay on the data-source interface.
 
 ## Architecture
 

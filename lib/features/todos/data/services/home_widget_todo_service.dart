@@ -1,16 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:pdp_todo_app/core/home_widget/todo_widget_contract.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 
 class HomeWidgetTodoService {
-  static const appGroupId = 'group.com.example.pdpTodoApp';
-  static const iosName = 'TodoWidget';
-  static const todosKey = 'todos';
-  static const widgetTodosKey = 'widget_todos';
-  static const todosTotalKey = 'todos_total';
-  static const widgetLimit = 8;
-  static const _androidWidgetName = 'TodoWidget';
-  static const _qualifiedAndroidName = 'com.example.pdp_todo_app.TodoWidget';
+  static const appGroupId = TodoWidgetContract.appGroupId;
+  static const iosName = TodoWidgetContract.widgetName;
+  static const todosKey = TodoWidgetContract.todosKey;
+  static const widgetTodosKey = TodoWidgetContract.widgetTodosKey;
+  static const todosTotalKey = TodoWidgetContract.todosTotalKey;
+  static const widgetLimit = TodoWidgetContract.widgetLimit;
+  static const _androidWidgetName = TodoWidgetContract.widgetName;
+  static const _qualifiedAndroidName = TodoWidgetContract.qualifiedAndroidName;
+
+  bool _appGroupReady = false;
 
   Future<String?> load() async {
     await _ensureIosAppGroup();
@@ -37,9 +40,14 @@ class HomeWidgetTodoService {
   }
 
   Future<void> _ensureIosAppGroup() async {
+    if (_appGroupReady) {
+      return;
+    }
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
+      _appGroupReady = true;
       return;
     }
     await HomeWidget.setAppGroupId(appGroupId);
+    _appGroupReady = true;
   }
 }

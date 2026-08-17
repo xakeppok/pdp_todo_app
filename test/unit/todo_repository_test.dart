@@ -34,7 +34,7 @@ void main() {
   test('maps not-found data source errors to NotFoundFailure', () async {
     final dataSource = MockTodoDataSource();
     when(() => dataSource.getTodoById('missing')).thenThrow(
-      const DataSourceException('Todo missing not found'),
+      DataSourceException.notFound('missing'),
     );
 
     final repository = TodoRepositoryImpl(dataSource);

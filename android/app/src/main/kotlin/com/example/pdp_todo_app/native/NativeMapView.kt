@@ -34,6 +34,7 @@ class NativeMapView(
         Log.d(TAG, "Map onCreate")
         mapView.onCreate(null)
         mapView.getMapAsync { mapLibreMap ->
+            if (destroyed) return@getMapAsync
             map = mapLibreMap
             mapLibreMap.addOnMapClickListener(clickListener)
             mapLibreMap.setStyle("https://demotiles.maplibre.org/style.json")

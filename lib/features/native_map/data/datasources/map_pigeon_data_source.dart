@@ -1,6 +1,6 @@
-import 'package:flutter/services.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/core/pigeon/platform_apis.g.dart';
+import 'package:pdp_todo_app/core/platform/platform_error_mapper.dart';
 import 'package:pdp_todo_app/features/native_map/data/datasources/map_data_source.dart';
 import 'package:pdp_todo_app/features/native_map/domain/entities/map_click.dart';
 
@@ -13,25 +13,15 @@ class MapPigeonDataSource implements MapDataSource {
 
   @override
   Stream<MapClick> get mapClicks {
-    return _watchMapClicks()
-        .map(
-          (event) => MapClick(
-            latitude: event.latitude,
-            longitude: event.longitude,
-          ),
-        )
-        .handleError((Object error, StackTrace stackTrace) {
-          if (error is PlatformException) {
-            throw PlatformFailure(
-              error.message ?? 'Failed to listen for map clicks',
-            );
-          }
-          if (error is MissingPluginException) {
-            throw PlatformFailure(
-              error.message ?? 'Map click pigeon API is not implemented',
-            );
-          }
-          Error.throwWithStackTrace(error, stackTrace);
-        });
+    return mapPlatformStreamErrors(
+      _watchMapClicks().map(
+        (event) => MapClick(
+          latitude: event.latitude,
+          longitude: event.longitude,
+        ),
+      ),
+      fallback: 'Failed to listen for map clicks',
+      missingPlugin: 'Map click pigeon API is not implemented',
+    );
   }
 }

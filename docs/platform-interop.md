@@ -11,7 +11,7 @@ Official references used by this app’s APIs: [Platform channels](https://docs.
 | Topic | What you do | What you should see | Dart | Native |
 |-------|-------------|---------------------|------|--------|
 | **MethodChannel** | Todos screen, tap the battery card | `%` from `BatteryManager` / `UIDevice`; background the app, resume → refresh | [`battery_platform_data_source.dart`](../lib/features/battery/data/datasources/battery_platform_data_source.dart) | [`BatteryChannel.kt`](../android/app/src/main/kotlin/com/example/pdp_todo_app/native/BatteryChannel.kt) / [`BatteryChannel.swift`](../ios/Runner/Native/BatteryChannel.swift) |
-| **EventChannel** | Stay on Todos; toggle Wi‑Fi / cellular / airplane | Banner switches `wifi` / `mobile` / `none` | [`connectivity_platform_datasource.dart`](../lib/features/connectivity/data/datasources/connectivity_platform_datasource.dart) | [`ConnectivityChannel.kt`](../android/app/src/main/kotlin/com/example/pdp_todo_app/native/ConnectivityChannel.kt) / [`ConnectivityChannel.swift`](../ios/Runner/Native/ConnectivityChannel.swift) |
+| **EventChannel** | Stay on Todos; toggle Wi‑Fi / cellular / airplane | Banner switches `wifi` / `mobile` / `none` | [`connectivity_platform_data_source.dart`](../lib/features/connectivity/data/datasources/connectivity_platform_data_source.dart) | [`ConnectivityChannel.kt`](../android/app/src/main/kotlin/com/example/pdp_todo_app/native/ConnectivityChannel.kt) / [`ConnectivityChannel.swift`](../ios/Runner/Native/ConnectivityChannel.swift) |
 | **BasicMessageChannel** | App bar sync icon → type payload → **Ping** | Log: `ping` then `pong` with `android:…` / `ios:…` and matching `id` | [`messages_platform_data_source.dart`](../lib/features/messages/data/datasources/messages_platform_data_source.dart) | [`MessagesChannel.kt`](../android/app/src/main/kotlin/com/example/pdp_todo_app/native/MessagesChannel.kt) / [`MessagesChannel.swift`](../ios/Runner/Native/MessagesChannel.swift) |
 | **Pigeon** (typed twins + map clicks) | Default DI already uses Pigeon | Same UI; generated APIs instead of `pdp.flutter.app/*` | [`pigeons/platform_apis.dart`](../pigeons/platform_apis.dart), `*PigeonDataSource` | `*PigeonApi.kt` / `.swift`, `*PigeonStreamHandler` |
 | **Platform View** + Pigeon events | App bar map icon → pan/zoom → tap | MapLibre map; bottom banner shows `lat, lng` | [`native_map_page.dart`](../lib/features/native_map/presentation/pages/native_map_page.dart) | [`NativeMapView.kt`](../android/app/src/main/kotlin/com/example/pdp_todo_app/native/NativeMapView.kt) / [`NativeMapView.swift`](../ios/Runner/Native/NativeMapView.swift) |
@@ -56,7 +56,7 @@ invokeMethod("getBatteryLevel")  →  int  |  PlatformException  |  MissingPlugi
 
 - Native must **push** changes (`wifi` → `mobile`). That is EventChannel in this app.
 
-Manual and Pigeon battery hosts are both registered. Default DI is `BatteryPigeonDataSource`; uncomment `BatteryPlatformDataSource.new` in `di.dart` to hit `pdp.flutter.app/battery`.
+Manual and Pigeon battery hosts are both registered. Default DI is Pigeon (`usePigeonPlatformApis = true` in `di.dart`); set it to `false` to hit `pdp.flutter.app/battery`.
 
 ### Trade-offs
 
@@ -70,7 +70,7 @@ Manual and Pigeon battery hosts are both registered. Default DI is `BatteryPigeo
 1. `flutter run` → Todos. Battery card reads `%` via `GetBatteryLevel` → repository → data source.
 2. Tap the card to refresh (same one-shot call).
 3. Background the app: cubit does not hit the channel while paused; resume refreshes. See [`battery_cubit.dart`](../lib/features/battery/presentation/bloc/battery_cubit.dart).
-4. In `di.dart`, Pigeon is the default. Uncomment `BatteryPlatformDataSource.new` to show the manual channel — UI stays the same.
+4. In `di.dart`, Pigeon is the default. Set `usePigeonPlatformApis` to `false` to show the manual channel — UI stays the same.
 
 Tests: [`test/unit/battery_platform_channel_test.dart`](../test/unit/battery_platform_channel_test.dart).
 
@@ -106,7 +106,7 @@ listen  →  "wifi" | "mobile" | "none"  →  …  →  cancel
 1. Stay on Todos. Connectivity banner is a live subscription (`WatchConnectivity`).
 2. Toggle airplane mode / Wi‑Fi. Banner updates without a tap.
 3. Android: `Handler(Looper.getMainLooper()).post` before `eventSink`. iOS: `DispatchQueue.main.async`. Same in the Pigeon stream handlers and in [platform-channels.md](platform-channels.md).
-4. Optional: swap `ConnectivityPlatformDataSource` in `di.dart`.
+4. Optional: set `usePigeonPlatformApis` to `false` in `di.dart` to use `ConnectivityPlatformDataSource`.
 
 Tests: [`test/unit/connectivity_platform_channel_test.dart`](../test/unit/connectivity_platform_channel_test.dart). Unknown string `'bluetooth'` fails in the **repository** (`connectivity_repository_test.dart`), not the codec.
 
@@ -144,7 +144,7 @@ In this app Dart `send`s; native `setMessageHandler` replies. JSON codec is not 
 
 1. App bar sync icon → `/messages`.
 2. Default text field is `hello`. Ping. Expect a pong with the same `id` and `android:hello` / `ios:hello`.
-3. Default DI is Pigeon (`MessagesPigeonDataSource`). Uncomment `MessagesPlatformDataSource.new` to hit `pdp.flutter.app/messages`. Dart still validates pong + `id` on both stacks.
+3. Default DI is Pigeon (`MessagesPigeonDataSource`). Set `usePigeonPlatformApis` to `false` to hit `pdp.flutter.app/messages`. Dart still validates pong + `id` on both stacks.
 
 Tests: [`test/unit/messages_platform_channel_test.dart`](../test/unit/messages_platform_channel_test.dart), widget: [`test/widget/messages_page_test.dart`](../test/widget/messages_page_test.dart).
 
@@ -184,7 +184,7 @@ Pigeon `@EventChannelApi` methods return the **event type**, not `Stream`. The g
 ### Demo walkthrough
 
 1. Open [`pigeons/platform_apis.dart`](../pigeons/platform_apis.dart): `@ConfigurePigeon` outputs + the two `@HostApi`s + `@EventChannelApi`.
-2. Open [`di.dart`](../lib/app/di.dart): `BatteryPigeonDataSource.new` (manual line commented). Cubit / use case / repository stay on the data-source interface.
+2. Open [`di.dart`](../lib/app/di.dart): `usePigeonPlatformApis` selects Pigeon vs manual data sources. Cubit / use case / repository stay on the data-source interface.
 3. Dart call site: [`battery_pigeon_data_source.dart`](../lib/features/battery/data/datasources/battery_pigeon_data_source.dart) — `await _api.getBatteryLevel()`.
 4. Registration: [`MainActivity.kt`](../android/app/src/main/kotlin/com/example/pdp_todo_app/MainActivity.kt) `BatteryHostApi.setUp`, `ConnectivityEventsStreamHandler.register`, `OnMapClickStreamHandler.register`. Same idea in [`AppDelegate.swift`](../ios/Runner/AppDelegate.swift).
 

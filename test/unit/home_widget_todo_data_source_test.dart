@@ -122,4 +122,30 @@ void main() {
       throwsA(isA<DataSourceException>()),
     );
   });
+
+  test('serializes concurrent writes so later updates are not lost', () async {
+    final service = _SlowHomeWidgetTodoService();
+    final source = HomeWidgetTodoDataSource(
+      service: service,
+      seed: const [],
+    );
+
+    await Future.wait([
+      source.createTodo(extra),
+      source.createTodo(
+        extra.copyWith(id: 'todo-6', title: 'Feed the cat'),
+      ),
+    ]);
+
+    final todos = await source.getTodos();
+    expect(todos.map((todo) => todo.id), unorderedEquals(['todo-5', 'todo-6']));
+  });
+}
+
+class _SlowHomeWidgetTodoService extends FakeHomeWidgetTodoService {
+  @override
+  Future<String?> load() async {
+    await Future<void>.delayed(const Duration(milliseconds: 15));
+    return json;
+  }
 }

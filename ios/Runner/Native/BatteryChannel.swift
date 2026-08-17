@@ -14,12 +14,8 @@ final class BatteryChannel {
         channel.setMethodCallHandler { call, result in
             switch call.method {
             case "getBatteryLevel":
-                UIDevice.current.isBatteryMonitoringEnabled = true
-
-                let batteryLevel = UIDevice.current.batteryLevel
-
-                if batteryLevel >= 0 {
-                    result(Int(batteryLevel * 100))
+                if let batteryLevel = BatteryLevelReader.capacityPercent() {
+                    result(batteryLevel)
                 } else {
                     result(
                         FlutterError(

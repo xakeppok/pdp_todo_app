@@ -1,12 +1,8 @@
 package com.example.pdp_todo_app
 
-import android.app.ActivityOptions
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -64,7 +60,7 @@ internal fun updateAppWidget(
 ) {
     val views = RemoteViews(context.packageName, R.layout.todo_widget)
     val todos = parseTodos(TodoWidgetStore.widgetTodosJson(widgetData))
-    val listIntent = launchIntent(context, listUri(), "list")
+    val listIntent = TodoWidgetIntents.launchIntent(context, TodoWidgetIntents.listUri(), "list")
     views.setOnClickPendingIntent(R.id.todo_more, listIntent)
 
     if (todos.isEmpty()) {
@@ -91,9 +87,13 @@ internal fun updateAppWidget(
             views.setTextViewText(slot.titleId, todo.title)
             views.setOnClickPendingIntent(
                 slot.checkId,
-                completeBroadcastIntent(context, todo.id)
+                TodoWidgetIntents.completeBroadcastIntent(context, todo.id)
             )
-            val details = launchIntent(context, detailsUri(todo.id), "details-${todo.id}")
+            val details = TodoWidgetIntents.launchIntent(
+                context,
+                TodoWidgetIntents.detailsUri(todo.id),
+                "details-${todo.id}"
+            )
             views.setOnClickPendingIntent(slot.titleId, details)
         } else {
             views.setViewVisibility(slot.rowId, View.GONE)
@@ -178,66 +178,4 @@ private fun setChecked(views: RemoteViews, viewId: Int, checked: Boolean) {
     } else {
         views.setBoolean(viewId, "setChecked", checked)
     }
-}
-
-private fun completeUri(id: String): Uri {
-    return Uri.Builder()
-        .scheme("todowidget")
-        .authority("complete")
-        .appendQueryParameter("id", id)
-        .build()
-}
-
-private fun detailsUri(id: String): Uri {
-    return Uri.parse("todowidget://app/todos/$id")
-}
-
-private fun listUri(): Uri {
-    return Uri.parse("todowidget://app/todos")
-}
-
-private fun completeBroadcastIntent(context: Context, id: String): PendingIntent {
-    val intent = Intent(context, TodoWidgetToggleReceiver::class.java).apply {
-        data = completeUri(id)
-        action = TodoWidgetToggleReceiver.ACTION
-    }
-    var flags = PendingIntent.FLAG_UPDATE_CURRENT
-    if (Build.VERSION.SDK_INT >= 23) {
-        flags = flags or PendingIntent.FLAG_IMMUTABLE
-    }
-    return PendingIntent.getBroadcast(
-        context,
-        31 * "complete".hashCode() + id.hashCode(),
-        intent,
-        flags
-    )
-}
-
-private fun launchIntent(context: Context, uri: Uri, key: String): PendingIntent {
-    val intent = Intent(context, MainActivity::class.java).apply {
-        data = uri
-        action = Intent.ACTION_VIEW
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-    }
-
-    var flags = PendingIntent.FLAG_UPDATE_CURRENT
-    if (Build.VERSION.SDK_INT >= 23) {
-        flags = flags or PendingIntent.FLAG_IMMUTABLE
-    }
-
-    val requestCode = key.hashCode()
-    if (Build.VERSION.SDK_INT < 34) {
-        return PendingIntent.getActivity(context, requestCode, intent, flags)
-    }
-
-    val options = ActivityOptions.makeBasic()
-    if (Build.VERSION.SDK_INT >= 35) {
-        options.setPendingIntentCreatorBackgroundActivityStartMode(
-            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-        )
-    } else {
-        options.pendingIntentBackgroundActivityStartMode =
-            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-    }
-    return PendingIntent.getActivity(context, requestCode, intent, flags, options.toBundle())
 }

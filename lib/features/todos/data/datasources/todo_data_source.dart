@@ -1,9 +1,18 @@
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 
 class DataSourceException implements Exception {
-  const DataSourceException(this.message);
+  const DataSourceException(this.message, {this.isNotFound = false});
+
+  factory DataSourceException.notFound(String id) {
+    return DataSourceException('Todo $id not found', isNotFound: true);
+  }
+
+  factory DataSourceException.alreadyExists(String id) {
+    return DataSourceException('Todo $id already exists');
+  }
 
   final String message;
+  final bool isNotFound;
 
   @override
   String toString() => 'DataSourceException: $message';

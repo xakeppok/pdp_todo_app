@@ -54,7 +54,7 @@ class Todo extends Equatable {
       priority: priority ?? this.priority,
       dueDate: dueDate ?? this.dueDate,
       completed: completed ?? this.completed,
-      tags: tags ?? this.tags,
+      tags: List<String>.from(tags ?? this.tags),
     );
   }
 

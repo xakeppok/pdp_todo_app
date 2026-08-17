@@ -8,33 +8,25 @@ final class ConnectivityPigeonStreamHandler: ConnectivityEventsStreamHandler {
         withArguments arguments: Any?,
         sink: PigeonEventSink<ApiConnectivityStatus>
     ) {
+        stopMonitor()
         eventSink = sink
         let monitor = NWPathMonitor()
         self.monitor = monitor
         monitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
-                self?.eventSink?.success(self?.status(for: path) ?? .none)
+                self?.eventSink?.success(AppConnectivityStatus.from(path: path).pigeonStatus)
             }
         }
         monitor.start(queue: DispatchQueue(label: "pdp.connectivity.pigeon"))
     }
 
     override func onCancel(withArguments arguments: Any?) {
-        monitor?.cancel()
-        monitor = nil
+        stopMonitor()
         eventSink = nil
     }
 
-    private func status(for path: NWPath) -> ApiConnectivityStatus {
-        guard path.status == .satisfied else {
-            return .none
-        }
-        if path.usesInterfaceType(.wifi) || path.usesInterfaceType(.wiredEthernet) {
-            return .wifi
-        }
-        if path.usesInterfaceType(.cellular) {
-            return .mobile
-        }
-        return .none
+    private func stopMonitor() {
+        monitor?.cancel()
+        monitor = nil
     }
 }

@@ -1,6 +1,5 @@
-import 'package:flutter/services.dart';
-import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/core/pigeon/platform_apis.g.dart';
+import 'package:pdp_todo_app/core/platform/platform_error_mapper.dart';
 import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_data_source.dart';
 
 class ConnectivityPigeonDataSource implements ConnectivityDataSource {
@@ -14,20 +13,10 @@ class ConnectivityPigeonDataSource implements ConnectivityDataSource {
 
   @override
   Stream<String> get connectivity {
-    return _watchConnectivity().map((status) => status.name).handleError(
-      (Object error, StackTrace stackTrace) {
-        if (error is PlatformException) {
-          throw PlatformFailure(
-            error.message ?? 'Failed to get connectivity',
-          );
-        }
-        if (error is MissingPluginException) {
-          throw PlatformFailure(
-            error.message ?? 'Connectivity pigeon API is not implemented',
-          );
-        }
-        Error.throwWithStackTrace(error, stackTrace);
-      },
+    return mapPlatformStreamErrors(
+      _watchConnectivity().map((status) => status.name),
+      fallback: 'Failed to get connectivity',
+      missingPlugin: 'Connectivity pigeon API is not implemented',
     );
   }
 }

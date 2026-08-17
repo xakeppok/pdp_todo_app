@@ -6,6 +6,7 @@ import android.content.Intent
 
 class TodoWidgetToggleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != ACTION) return
         val id = intent.data?.getQueryParameter("id") ?: return
         TodoWidgetStore.toggleCompleted(context, id)
     }

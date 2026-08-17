@@ -7,18 +7,21 @@ import 'package:pdp_todo_app/core/router/app_router.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
 import 'package:pdp_todo_app/features/battery/data/datasources/battery_data_source.dart';
 import 'package:pdp_todo_app/features/battery/data/datasources/battery_pigeon_data_source.dart';
+import 'package:pdp_todo_app/features/battery/data/datasources/battery_platform_data_source.dart';
 import 'package:pdp_todo_app/features/battery/data/repositories/battery_repository_impl.dart';
 import 'package:pdp_todo_app/features/battery/domain/repositories/battery_repository.dart';
 import 'package:pdp_todo_app/features/battery/domain/usecases/get_battery_level.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
 import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_data_source.dart';
 import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_pigeon_data_source.dart';
+import 'package:pdp_todo_app/features/connectivity/data/datasources/connectivity_platform_data_source.dart';
 import 'package:pdp_todo_app/features/connectivity/data/repositories/connectivity_repository_impl.dart';
 import 'package:pdp_todo_app/features/connectivity/domain/repositories/connectivity_repository.dart';
 import 'package:pdp_todo_app/features/connectivity/domain/usecases/watch_connectivity.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
 import 'package:pdp_todo_app/features/messages/data/datasources/messages_data_source.dart';
 import 'package:pdp_todo_app/features/messages/data/datasources/messages_pigeon_data_source.dart';
+import 'package:pdp_todo_app/features/messages/data/datasources/messages_platform_data_source.dart';
 import 'package:pdp_todo_app/features/messages/data/repositories/messages_repository_impl.dart';
 import 'package:pdp_todo_app/features/messages/domain/repositories/messages_repository.dart';
 import 'package:pdp_todo_app/features/messages/domain/usecases/send_ping.dart';
@@ -48,6 +51,9 @@ import 'package:pdp_todo_app/features/todos/presentation/bloc/todo_form_cubit.da
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
 
 final GetIt getIt = GetIt.instance;
+
+/// Flip to `false` to exercise the manual Method/Event/BasicMessage channels.
+const bool usePigeonPlatformApis = true;
 
 Future<void> configureDependencies({
   Clock? clock,
@@ -85,8 +91,9 @@ Future<void> configureDependencies({
     ..registerLazySingleton(() => DeleteTodo(getIt()))
     ..registerLazySingleton(() => ToggleTodoCompletion(getIt()))
     ..registerLazySingleton<BatteryDataSource>(
-      BatteryPigeonDataSource.new,
-      // BatteryPlatformDataSource.new,
+      usePigeonPlatformApis
+          ? BatteryPigeonDataSource.new
+          : BatteryPlatformDataSource.new,
     )
     ..registerLazySingleton<BatteryRepository>(
       () => BatteryRepositoryImpl(getIt<BatteryDataSource>()),
@@ -94,8 +101,9 @@ Future<void> configureDependencies({
     ..registerLazySingleton(() => GetBatteryLevel(getIt<BatteryRepository>()))
     ..registerLazySingleton(() => BatteryCubit(getIt()))
     ..registerLazySingleton<ConnectivityDataSource>(
-      ConnectivityPigeonDataSource.new,
-      // ConnectivityPlatformDataSource.new,
+      usePigeonPlatformApis
+          ? ConnectivityPigeonDataSource.new
+          : ConnectivityPlatformDataSource.new,
     )
     ..registerLazySingleton<ConnectivityRepository>(
       () => ConnectivityRepositoryImpl(getIt<ConnectivityDataSource>()),
@@ -107,8 +115,9 @@ Future<void> configureDependencies({
       () => ConnectivityCubit(getIt<WatchConnectivity>()),
     )
     ..registerLazySingleton<MessagesDataSource>(
-      MessagesPigeonDataSource.new,
-      // MessagesPlatformDataSource.new,
+      usePigeonPlatformApis
+          ? MessagesPigeonDataSource.new
+          : MessagesPlatformDataSource.new,
     )
     ..registerLazySingleton<MessagesRepository>(
       () => MessagesRepositoryImpl(getIt<MessagesDataSource>()),

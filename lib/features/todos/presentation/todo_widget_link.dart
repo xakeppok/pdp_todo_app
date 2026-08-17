@@ -1,10 +1,11 @@
+import 'package:pdp_todo_app/core/home_widget/todo_widget_contract.dart';
 import 'package:pdp_todo_app/core/router/app_routes.dart';
 
 final class TodoWidgetLink {
   const TodoWidgetLink({this.id});
 
-  static const scheme = 'todowidget';
-  static const host = 'app';
+  static const scheme = TodoWidgetContract.scheme;
+  static const host = TodoWidgetContract.host;
 
   final String? id;
 
