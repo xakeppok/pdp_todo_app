@@ -4,8 +4,8 @@ import 'package:pdp_todo_app/core/router/app_routes.dart';
 final class TodoWidgetLink {
   const TodoWidgetLink({this.id});
 
-  static const scheme = TodoWidgetContract.scheme;
-  static const host = TodoWidgetContract.host;
+  static const String scheme = TodoWidgetContract.scheme;
+  static const String host = TodoWidgetContract.host;
 
   final String? id;
 

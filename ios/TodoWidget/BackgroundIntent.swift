@@ -50,6 +50,7 @@ enum TodoWidgetStore {
         }
         defaults?.set(text, forKey: TodoWidgetConfig.todosKey)
         writeWidgetProjection(updated, defaults: defaults)
+        defaults?.synchronize()
         WidgetCenter.shared.reloadTimelines(ofKind: TodoWidgetConfig.kind)
     }
 
@@ -75,6 +76,7 @@ enum TodoWidgetStore {
 public struct BackgroundIntent: AppIntent {
     public static var title: LocalizedStringResource = "Toggle Todo"
     public static var isDiscoverable = false
+    public static var openAppWhenRun = false
 
     @Parameter(title: "Todo ID")
     var todoId: String
@@ -105,7 +107,3 @@ public struct BackgroundIntent: AppIntent {
         return .result()
     }
 }
-
-@available(iOS 17, *)
-@available(iOSApplicationExtension, unavailable)
-extension BackgroundIntent: ForegroundContinuableIntent {}

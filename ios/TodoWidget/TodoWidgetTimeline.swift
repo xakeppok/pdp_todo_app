@@ -15,7 +15,20 @@ struct TodoEntry: TimelineEntry {
 
 enum TodoWidgetTimeline {
     static var listURL: URL {
-        URL(string: "todowidget://app/todos")!
+        widgetURL(path: "/todos")
+    }
+
+    static func detailsURL(id: String) -> URL {
+        widgetURL(path: "/todos/\(id)")
+    }
+
+    private static func widgetURL(path: String) -> URL {
+        var components = URLComponents()
+        components.scheme = "todowidget"
+        components.host = "app"
+        components.path = path
+        components.queryItems = [URLQueryItem(name: "homeWidget", value: nil)]
+        return components.url ?? URL(string: "todowidget://app/todos")!
     }
 
     static func visibleTodoCount(family: WidgetFamily, total: Int) -> Int {

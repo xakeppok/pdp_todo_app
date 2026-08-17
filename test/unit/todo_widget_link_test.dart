@@ -30,6 +30,12 @@ void main() {
       TodoWidgetLink.tryParse(Uri.parse('todowidget://app/todos'))?.location,
       AppRoutes.todos,
     );
+    expect(
+      TodoWidgetLink.tryParse(
+        Uri.parse('todowidget://app/todos/todo-2?homeWidget'),
+      )?.location,
+      AppRoutes.details('todo-2'),
+    );
   });
 
   test('ignores unknown widget links', () {

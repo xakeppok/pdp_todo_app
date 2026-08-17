@@ -1,4 +1,3 @@
-/// Serializes asynchronous work so later callers wait for earlier ones.
 class AsyncMutex {
   Future<void> _tail = Future<void>.value();
 

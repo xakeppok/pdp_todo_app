@@ -141,19 +141,26 @@ struct TodoWidgetRow: View {
     let slot: Int
 
     var body: some View {
-        Button(
-            intent: BackgroundIntent(
-                todoId: todo.id,
-                appGroup: TodoWidgetConfig.appGroupId,
-                slot: slot
-            )
-        ) {
-            HStack(alignment: .center, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
+            Button(
+                intent: BackgroundIntent(
+                    todoId: todo.id,
+                    appGroup: TodoWidgetConfig.appGroupId,
+                    slot: slot
+                )
+            ) {
                 Image(systemName: todo.completed ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundStyle(todo.completed ? accent : Color.secondary.opacity(0.4))
                     .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                todo.completed ? "Mark \(todo.title) incomplete" : "Mark \(todo.title) complete"
+            )
 
+            Link(destination: TodoWidgetTimeline.detailsURL(id: todo.id)) {
                 Text(todo.title)
                     .font(.system(size: 14, weight: .medium))
                     .lineLimit(1)
@@ -166,12 +173,10 @@ struct TodoWidgetRow: View {
                         }
                     }
                     .frame(maxWidth: .infinity, minHeight: 28, alignment: .leading)
+                    .contentShape(Rectangle())
             }
-            .contentShape(Rectangle())
+            .accessibilityLabel("Open \(todo.title)")
         }
-        .buttonStyle(.plain)
-        .invalidatableContent()
-        .accessibilityLabel(todo.completed ? "Mark \(todo.title) incomplete" : "Mark \(todo.title) complete")
     }
 }
 

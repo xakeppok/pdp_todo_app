@@ -3,13 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:pdp_todo_app/app/di.dart';
 import 'package:pdp_todo_app/app/theme.dart';
 import 'package:pdp_todo_app/app/theme_cubit.dart';
+import 'package:pdp_todo_app/core/home_widget/todo_widget_contract.dart';
 import 'package:pdp_todo_app/features/battery/presentation/bloc/battery_cubit.dart';
 import 'package:pdp_todo_app/features/connectivity/presentation/bloc/connectivity_cubit.dart';
 import 'package:pdp_todo_app/features/messages/presentation/bloc/messages_cubit.dart';
 import 'package:pdp_todo_app/features/todos/presentation/bloc/todos_bloc.dart';
+import 'package:pdp_todo_app/features/todos/presentation/todo_widget_link.dart';
 
 class TodoApp extends StatefulWidget {
   const TodoApp({
@@ -37,6 +40,7 @@ class _TodoAppState extends State<TodoApp> with WidgetsBindingObserver {
   late final bool _ownsBloc;
   late final bool _ownsThemeCubit;
   late final bool _syncOnResume;
+  StreamSubscription<Uri?>? _widgetClicks;
 
   @override
   void initState() {
@@ -51,6 +55,7 @@ class _TodoAppState extends State<TodoApp> with WidgetsBindingObserver {
     _syncOnResume = widget.router == null && widget.todosBloc == null;
     if (_syncOnResume) {
       WidgetsBinding.instance.addObserver(this);
+      unawaited(_listenToWidgetClicks());
     }
   }
 
@@ -65,6 +70,7 @@ class _TodoAppState extends State<TodoApp> with WidgetsBindingObserver {
   void dispose() {
     if (_syncOnResume) {
       WidgetsBinding.instance.removeObserver(this);
+      unawaited(_widgetClicks?.cancel());
     }
     if (_ownsBloc) {
       unawaited(_todosBloc.close());
@@ -73,6 +79,20 @@ class _TodoAppState extends State<TodoApp> with WidgetsBindingObserver {
       unawaited(_themeCubit.close());
     }
     super.dispose();
+  }
+
+  Future<void> _listenToWidgetClicks() async {
+    await HomeWidget.setAppGroupId(TodoWidgetContract.appGroupId);
+    _openWidgetUri(await HomeWidget.initiallyLaunchedFromHomeWidget());
+    _widgetClicks = HomeWidget.widgetClicked.listen(_openWidgetUri);
+  }
+
+  void _openWidgetUri(Uri? uri) {
+    final location = TodoWidgetLink.tryParse(uri)?.location;
+    if (location == null) {
+      return;
+    }
+    _router.go(location);
   }
 
   @override

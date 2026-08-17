@@ -4,14 +4,15 @@ import 'package:pdp_todo_app/core/home_widget/todo_widget_contract.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 
 class HomeWidgetTodoService {
-  static const appGroupId = TodoWidgetContract.appGroupId;
-  static const iosName = TodoWidgetContract.widgetName;
-  static const todosKey = TodoWidgetContract.todosKey;
-  static const widgetTodosKey = TodoWidgetContract.widgetTodosKey;
-  static const todosTotalKey = TodoWidgetContract.todosTotalKey;
-  static const widgetLimit = TodoWidgetContract.widgetLimit;
-  static const _androidWidgetName = TodoWidgetContract.widgetName;
-  static const _qualifiedAndroidName = TodoWidgetContract.qualifiedAndroidName;
+  static const String appGroupId = TodoWidgetContract.appGroupId;
+  static const String iosName = TodoWidgetContract.widgetName;
+  static const String todosKey = TodoWidgetContract.todosKey;
+  static const String widgetTodosKey = TodoWidgetContract.widgetTodosKey;
+  static const String todosTotalKey = TodoWidgetContract.todosTotalKey;
+  static const int widgetLimit = TodoWidgetContract.widgetLimit;
+  static const String _androidWidgetName = TodoWidgetContract.widgetName;
+  static const String _qualifiedAndroidName =
+      TodoWidgetContract.qualifiedAndroidName;
 
   bool _appGroupReady = false;
 

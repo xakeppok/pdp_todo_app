@@ -1,4 +1,3 @@
-import 'package:pdp_todo_app/core/error/failures.dart';
 import 'package:pdp_todo_app/core/pigeon/platform_apis.g.dart';
 import 'package:pdp_todo_app/core/platform/platform_error_mapper.dart';
 import 'package:pdp_todo_app/features/native_map/data/datasources/map_data_source.dart';

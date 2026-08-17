@@ -49,6 +49,7 @@ GoRouter createAppRouter({
             builder: (context, state) {
               final id = state.pathParameters['id']!;
               return BlocProvider(
+                key: ValueKey(id),
                 create: (_) => createDetailsCubit(id),
                 child: TodoDetailsPage(clock: clock),
               );

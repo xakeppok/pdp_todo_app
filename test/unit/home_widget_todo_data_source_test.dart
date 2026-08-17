@@ -146,6 +146,6 @@ class _SlowHomeWidgetTodoService extends FakeHomeWidgetTodoService {
   @override
   Future<String?> load() async {
     await Future<void>.delayed(const Duration(milliseconds: 15));
-    return json;
+    return this.json;
   }
 }
