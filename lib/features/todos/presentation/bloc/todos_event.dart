@@ -11,6 +11,10 @@ final class TodosLoadRequested extends TodosEvent {
   const TodosLoadRequested();
 }
 
+final class TodosSyncRequested extends TodosEvent {
+  const TodosSyncRequested();
+}
+
 final class TodosRetryRequested extends TodosEvent {
   const TodosRetryRequested();
 }

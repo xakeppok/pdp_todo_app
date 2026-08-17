@@ -20,6 +20,8 @@ Future<void> main() async {
       ),
     );
   }
-  await configureDependencies(clock: FixedClock(DateTime(2026, 8, 12, 15)));
+  await configureDependencies(
+    clock: FixedClock(DateTime(2026, 8, 12, 15)),
+  );
   runApp(const TodoApp());
 }

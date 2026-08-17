@@ -1,10 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pdp_todo_app/core/error/failures.dart';
-import 'package:pdp_todo_app/features/todos/data/datasources/in_memory_todo_data_source.dart';
+import 'package:pdp_todo_app/features/todos/data/datasources/home_widget_todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 import 'package:pdp_todo_app/features/todos/data/repositories/todo_repository_impl.dart';
+
+import '../helpers/fake_home_widget_todo_service.dart';
 
 class MockTodoDataSource extends Mock implements TodoDataSource {}
 
@@ -43,9 +45,12 @@ void main() {
     );
   });
 
-  test('in-memory fake persists created todos', () async {
-    final fake = InMemoryTodoDataSource(seed: const []);
-    final repository = TodoRepositoryImpl(fake);
+  test('json store persists created todos', () async {
+    final source = HomeWidgetTodoDataSource(
+      service: FakeHomeWidgetTodoService(),
+      seed: const [],
+    );
+    final repository = TodoRepositoryImpl(source);
 
     await repository.createTodo(
       const TodoModel(

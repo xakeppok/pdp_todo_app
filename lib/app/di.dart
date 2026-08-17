@@ -29,7 +29,7 @@ import 'package:pdp_todo_app/features/native_map/data/repositories/map_repositor
 import 'package:pdp_todo_app/features/native_map/domain/repositories/map_repository.dart';
 import 'package:pdp_todo_app/features/native_map/domain/usecases/watch_map_clicks.dart';
 import 'package:pdp_todo_app/features/native_map/presentation/bloc/map_cubit.dart';
-import 'package:pdp_todo_app/features/todos/data/datasources/in_memory_todo_data_source.dart';
+import 'package:pdp_todo_app/features/todos/data/datasources/home_widget_todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/datasources/todo_data_source.dart';
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 import 'package:pdp_todo_app/features/todos/data/repositories/todo_repository_impl.dart';
@@ -63,7 +63,10 @@ Future<void> configureDependencies({
   final resolvedClock = clock ?? const SystemClock();
   final resolvedDataSource =
       dataSource ??
-      InMemoryTodoDataSource(seed: seed, failureMode: failureMode);
+      HomeWidgetTodoDataSource(
+        seed: seed,
+        failureMode: failureMode,
+      );
 
   getIt
     ..registerSingleton<Clock>(resolvedClock)

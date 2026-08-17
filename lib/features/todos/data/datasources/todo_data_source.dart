@@ -1,5 +1,14 @@
 import 'package:pdp_todo_app/features/todos/data/models/todo_model.dart';
 
+class DataSourceException implements Exception {
+  const DataSourceException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'DataSourceException: $message';
+}
+
 enum FailureMode {
   none('off'),
   throwOnGet('reads'),

@@ -23,6 +23,7 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
   }) : super(const TodosInitial()) {
     on<TodosLoadRequested>(_onLoad);
     on<TodosRetryRequested>(_onLoad);
+    on<TodosSyncRequested>(_onSync);
     on<TodosFilterChanged>(_onFilterChanged);
     on<TodosSortChanged>(_onSortChanged);
     on<TodosToggleCompleted>(_onToggleCompleted);
@@ -74,6 +75,24 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     }
   }
 
+  Future<void> _onSync(
+    TodosSyncRequested event,
+    Emitter<TodosState> emit,
+  ) async {
+    try {
+      final allTodos = await _getTodos();
+      emit(
+        _buildVisibleState(
+          allTodos: allTodos,
+          filter: state.filter,
+          sort: state.sort,
+        ),
+      );
+    } on Object {
+      // Keep the current snapshot if a background widget sync fails.
+    }
+  }
+
   void _onFilterChanged(
     TodosFilterChanged event,
     Emitter<TodosState> emit,
@@ -104,15 +123,22 @@ class TodosBloc extends Bloc<TodosEvent, TodosState> {
     TodosToggleCompleted event,
     Emitter<TodosState> emit,
   ) async {
+    await _applyCompletion(todo: event.todo, emit: emit);
+  }
+
+  Future<void> _applyCompletion({
+    required Todo todo,
+    required Emitter<TodosState> emit,
+  }) async {
     final filter = state.filter;
     final sort = state.sort;
     final currentTodos = state.allTodos;
 
     try {
-      final updated = await _toggleTodoCompletion(event.todo);
+      final updated = await _toggleTodoCompletion(todo);
       final allTodos = [
-        for (final todo in currentTodos)
-          if (todo.id == updated.id) updated else todo,
+        for (final item in currentTodos)
+          if (item.id == updated.id) updated else item,
       ];
       emit(
         _buildVisibleState(

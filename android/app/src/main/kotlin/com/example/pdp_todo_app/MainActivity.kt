@@ -2,6 +2,7 @@ package com.example.pdp_todo_app
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import android.content.Intent
 import com.example.pdp_todo_app.native.BatteryChannel
 import com.example.pdp_todo_app.native.BatteryPigeonApi
 import com.example.pdp_todo_app.native.ConnectivityChannel
@@ -75,5 +76,23 @@ class MainActivity : FlutterActivity() {
             messenger,
             connectivityPigeonStreamHandler
         )
+    }
+
+    override fun getInitialRoute(): String? {
+        return widgetRoute(intent) ?: super.getInitialRoute()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val route = widgetRoute(intent) ?: return
+        flutterEngine?.navigationChannel?.pushRoute(route)
+    }
+
+    private fun widgetRoute(intent: Intent?): String? {
+        val uri = intent?.data ?: return null
+        if (uri.scheme != "todowidget") return null
+        val path = uri.path
+        return if (path.isNullOrEmpty() || path == "/") "/todos" else path
     }
 }

@@ -12,6 +12,7 @@ import 'package:pdp_todo_app/features/todos/presentation/bloc/todo_form_cubit.da
 import 'package:pdp_todo_app/features/todos/presentation/pages/create_todo_page.dart';
 import 'package:pdp_todo_app/features/todos/presentation/pages/todo_details_page.dart';
 import 'package:pdp_todo_app/features/todos/presentation/pages/todos_page.dart';
+import 'package:pdp_todo_app/features/todos/presentation/todo_widget_link.dart';
 
 typedef TodoFormCubitFactory = TodoFormCubit Function({Todo? initialTodo});
 typedef TodoDetailsCubitFactory = TodoDetailsCubit Function(String todoId);
@@ -26,6 +27,7 @@ GoRouter createAppRouter({
 }) {
   return GoRouter(
     initialLocation: initialLocation,
+    redirect: _widgetDeepLinkRedirect,
     routes: [
       GoRoute(
         path: AppRoutes.root,
@@ -86,4 +88,10 @@ GoRouter createAppRouter({
       ),
     ],
   );
+}
+
+String? _widgetDeepLinkRedirect(BuildContext context, GoRouterState state) {
+  final location = TodoWidgetLink.tryParse(state.uri)?.location;
+  if (location == null || state.matchedLocation == location) return null;
+  return location;
 }

@@ -30,12 +30,13 @@ class TodoApp extends StatefulWidget {
   State<TodoApp> createState() => _TodoAppState();
 }
 
-class _TodoAppState extends State<TodoApp> {
+class _TodoAppState extends State<TodoApp> with WidgetsBindingObserver {
   late final GoRouter _router;
   late final TodosBloc _todosBloc;
   late final ThemeCubit _themeCubit;
   late final bool _ownsBloc;
   late final bool _ownsThemeCubit;
+  late final bool _syncOnResume;
 
   @override
   void initState() {
@@ -47,10 +48,24 @@ class _TodoAppState extends State<TodoApp> {
         (createTodosBloc()..add(const TodosLoadRequested()));
     _ownsThemeCubit = widget.themeCubit == null;
     _themeCubit = widget.themeCubit ?? ThemeCubit(widget.themeMode);
+    _syncOnResume = widget.router == null && widget.todosBloc == null;
+    if (_syncOnResume) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _todosBloc.add(const TodosSyncRequested());
+    }
   }
 
   @override
   void dispose() {
+    if (_syncOnResume) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
     if (_ownsBloc) {
       unawaited(_todosBloc.close());
     }

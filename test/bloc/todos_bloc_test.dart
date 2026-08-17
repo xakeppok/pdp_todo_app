@@ -261,4 +261,34 @@ void main() {
       isA<TodosLoaded>().having((s) => s.actionMessage, 'cleared', isNull),
     ],
   );
+
+  blocTest<TodosBloc, TodosState>(
+    'sync reloads todos without a loading state',
+    build: () {
+      var calls = 0;
+      when(() => getTodos()).thenAnswer((_) async {
+        calls += 1;
+        if (calls == 1) return buildTodoList();
+        return [
+          buildTodoList().first.copyWith(completed: true),
+          ...buildTodoList().skip(1),
+        ];
+      });
+      return buildBloc();
+    },
+    act: (bloc) async {
+      bloc.add(const TodosLoadRequested());
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const TodosSyncRequested());
+    },
+    expect: () => [
+      isA<TodosLoading>(),
+      isA<TodosLoaded>(),
+      isA<TodosLoaded>().having(
+        (s) => s.allTodos.first.completed,
+        'completed',
+        isTrue,
+      ),
+    ],
+  );
 }
