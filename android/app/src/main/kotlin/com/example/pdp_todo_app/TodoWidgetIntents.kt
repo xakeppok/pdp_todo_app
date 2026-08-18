@@ -16,25 +16,33 @@ internal object TodoWidgetIntents {
         return Uri.parse("todowidget://app/todos")
     }
 
-    fun completeBroadcastIntent(context: Context, id: String): PendingIntent {
-        val intent = Intent(context, TodoWidgetToggleReceiver::class.java).apply {
+    fun toggleIntent(context: Context, id: String): Intent {
+        return Intent(context, TodoWidgetToggleReceiver::class.java).apply {
             data = completeUri(id)
             action = TodoWidgetToggleReceiver.ACTION
+            putExtra(TodoWidgetToggleReceiver.EXTRA_ID, id)
         }
+    }
+
+    fun completeBroadcastIntent(context: Context, id: String): PendingIntent {
         return PendingIntent.getBroadcast(
             context,
             31 * "complete".hashCode() + id.hashCode(),
-            intent,
+            toggleIntent(context, id),
             pendingIntentFlags()
         )
     }
 
-    fun launchIntent(context: Context, uri: Uri, key: String): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
+    fun viewIntent(context: Context, uri: Uri): Intent {
+        return Intent(context, MainActivity::class.java).apply {
             data = uri
             action = Intent.ACTION_VIEW
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
+    }
+
+    fun launchIntent(context: Context, uri: Uri, key: String): PendingIntent {
+        val intent = viewIntent(context, uri)
         val requestCode = key.hashCode()
         val flags = pendingIntentFlags()
         if (Build.VERSION.SDK_INT < 34) {

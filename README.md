@@ -20,6 +20,10 @@ Platform channels (architecture, codecs, threading, **which channel**, snippets,
 
 Platform interop wiki + knowledge-sharing session (MethodChannel, EventChannel, BasicMessageChannel, Pigeon, Platform Views, runnable demos): [docs/platform-interop.md](docs/platform-interop.md)
 
+Home-screen widgets (Android App Widgets / Glance, iOS WidgetKit, `home_widget`, refresh, App Groups): [docs/home-widgets.md](docs/home-widgets.md)
+
+Widget knowledge-sharing session (demo script, screenshots, pitfalls): [docs/home-widgets-session.md](docs/home-widgets-session.md)
+
 Goldens (generate / update / review): [docs/goldens.md](docs/goldens.md)
 
 ## Platform channels
@@ -45,6 +49,77 @@ dart run pigeon --input pigeons/platform_apis.dart
 
 Do not edit `*.g.dart` / `*.g.kt` / `*.g.swift`.
 
+## Home-screen widgets
+
+Native home-screen widgets (not Flutter widgets) show the same todos the app persists. Flutter writes a JSON snapshot through [`home_widget`](https://pub.dev/packages/home_widget); Android and iOS paint it with RemoteViews / Glance / WidgetKit. Taps deep-link into `/todos` or `/todos/:id`. Checkboxes toggle in native code so they work when the Dart engine is dead.
+
+| Platform | What to add | Name |
+|----------|-------------|------|
+| Android | Widgets picker | **My Todos** (XML `RemoteViews`) and **My Todos (Glance)** |
+| iOS | Add Widget gallery | **My Todos** — small / medium / large |
+
+Architecture, refresh budgets, storage trade-offs, App Groups / signing / entitlements, best practices: [docs/home-widgets.md](docs/home-widgets.md).
+
+Team session + screenshot walkthrough: [docs/home-widgets-session.md](docs/home-widgets-session.md).
+
+### Run the widgets
+
+```bash
+flutter run
+```
+
+Use a **device or emulator with a home screen** (not desktop). Create or toggle a todo in the app, then add the widget — the list should match without waiting for a periodic OS refresh.
+
+**Android**
+
+1. `flutter run` (debug signing is enough for widgets).
+2. Long-press the home screen → **Widgets** → **pdp_todo_app** / **My Todos**.
+3. Pin **My Todos** and optionally **My Todos (Glance)** — same data, two renderers.
+4. Tap a title → app list or details. Tap a checkbox → completes without opening the app; resume the app to see the sync.
+
+**iOS (App Groups, signing, entitlements)**
+
+The widget is a separate target. It stays empty unless the **app and the extension share a Team and an App Group**.
+
+| Setting | Value |
+|---------|--------|
+| App id | `com.example.pdpTodoApp` |
+| Extension id | `com.example.pdpTodoApp.TodoWidget` |
+| App Group | `group.com.example.pdpTodoApp` |
+| Entitlements | `ios/Runner/Runner.entitlements`, `ios/TodoWidget/TodoWidget.entitlements` |
+| URL scheme | `todowidget` |
+| Extension OS | iOS 17+ (interactive toggle) |
+
+1. Open `ios/Runner.xcworkspace`.
+2. **Runner** and **TodoWidgetExtension** → Signing & Capabilities → pick your Team (automatic signing). There is no `DEVELOPMENT_TEAM` in git.
+3. Confirm App Groups lists `group.com.example.pdpTodoApp` on **both** targets.
+4. `flutter run` on a simulator or device.
+5. Long-press home → **Edit** → **Add Widget** → **Pdp Todo App** → **My Todos**. Swipe the gallery for size families.
+
+If the widget is blank while the app shows todos, the App Group is missing on one target. Full checklist: [docs/home-widgets.md — Setup](docs/home-widgets.md#setup).
+
+### Screenshots
+
+Working widgets, pickers, and deep links (also used in the session doc): [`home_widget_screenshots/`](home_widget_screenshots/).
+
+**Android** — picker (XML + Glance), home screen, opened from widget:
+
+![Android widget picker with My Todos and My Todos (Glance)](home_widget_screenshots/android_add_widget_both.png)
+
+![Both Android widgets on the home screen](home_widget_screenshots/android_widget_1.png)
+
+![Flutter todos list after a widget tap](home_widget_screenshots/android_opened_from_widget.png)
+
+**iOS** — add-widget gallery (small), home-screen widget, details deep link:
+
+![iOS add-widget gallery, small family](home_widget_screenshots/ios_add_widget.png)
+
+![iOS My Todos widget on the home screen](home_widget_screenshots/ios_widget.png)
+
+![Todo details after an iOS widget row tap](home_widget_screenshots/ios_deep_link_opened_from_widget.png)
+
+More sizes and the Android details route are in the same folder (`ios_add_widget_2.png`, `ios_add_widget_3.png`, `ios_widget_2.png`, `andorid_deep_link_opened_from_widget.png`).
+
 ## Setup
 
 ```bash
@@ -63,7 +138,7 @@ lefthook install
 flutter run
 ```
 
-In-memory fake with seeded todos. Clock fixed at `2026-08-12 15:00` so overdue stays deterministic.
+Todos persist in `home_widget` storage (seeded on first launch). Clock is `SystemClock` in the app; tests pin `2026-08-12 15:00` so overdue stays deterministic.
 
 ## Run the suite
 
@@ -129,9 +204,9 @@ flutter test --update-goldens test/golden
 ```
 lib/
   app/           # DI (get_it), themes, TodoApp
-  core/          # failures, clock, router, pigeon generated APIs
+  core/          # failures, clock, router, pigeon generated APIs, home-widget contract
   features/todos/
-    data/        # fake data source, models, repository
+    data/        # HomeWidgetTodoDataSource, models, repository
     domain/      # entities, validator, query, use cases, repository port
     presentation/# blocs, pages, widgets
   features/battery/
@@ -150,7 +225,10 @@ lib/
     data/        # Pigeon click stream + repository
     domain/      # port + WatchMapClicks
     presentation/# MapCubit, AndroidView / UiKitView page
-pigeons/         # Pigeon contract (not compiled into the app)
+android/.../TodoWidget*.kt  # RemoteViews + Glance + toggle
+ios/TodoWidget/             # WidgetKit extension (SwiftUI + App Intent)
+home_widget_screenshots/    # Device captures of the working widgets
+pigeons/                    # Pigeon contract (not compiled into the app)
 ```
 
 `get_it` is wired in `lib/app/di.dart`. `TodoApp` and `FailureModeToggleButton` also call it. Router comes from `createConfiguredRouter()`.
@@ -159,6 +237,7 @@ pigeons/         # Pigeon contract (not compiled into the app)
 
 - Flutter 3.44.9 / Dart 3.12.2
 - flutter_bloc, go_router, get_it, equatable
+- home_widget — Flutter ↔ App Widget / WidgetKit snapshot + update
 - pigeon (dev) — typed Dart/Kotlin/Swift channel codegen
 - mocktail, bloc_test, golden_toolkit, integration_test
 - very_good_analysis (`flutter analyze --fatal-infos` in CI)
@@ -168,5 +247,7 @@ pigeons/         # Pigeon contract (not compiled into the app)
 - [Testing cheat sheet](docs/testing-strategy.md) — pyramid, tools, decision guide, snippets
 - [Platform channels](docs/platform-channels.md) — architecture, codecs, threading, which channel, snippets, edge cases
 - [Platform interop session](docs/platform-interop.md) — wiki + 90 min knowledge-sharing: channels, Pigeon, Platform Views, demos
+- [Home-screen widgets](docs/home-widgets.md) — architecture, refresh lifecycle, data-sharing trade-offs, App Groups / signing, best practices
+- [Home-screen widgets session](docs/home-widgets-session.md) — 45–60 min knowledge-sharing, screenshot walkthrough, pitfalls
 - [Goldens](docs/goldens.md) — generate, update, review
 - [CI and flaky tests](docs/ci-and-flaky-tests.md)

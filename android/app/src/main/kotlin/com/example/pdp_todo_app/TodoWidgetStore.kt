@@ -9,6 +9,12 @@ import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.min
 
+internal data class WidgetTodo(
+    val id: String,
+    val title: String,
+    val completed: Boolean,
+)
+
 /** Keep keys in sync with Dart `TodoWidgetContract`. */
 internal object TodoWidgetStore {
     const val TODOS_KEY = "todos"
@@ -47,6 +53,32 @@ internal object TodoWidgetStore {
         return prefs.getString(WIDGET_TODOS_KEY, null)
     }
 
+    fun parseTodos(todosJson: String?): List<WidgetTodo> {
+        if (todosJson.isNullOrBlank()) return emptyList()
+
+        return try {
+            val array = JSONArray(todosJson)
+            buildList(array.length()) {
+                for (i in 0 until array.length()) {
+                    val todo = array.optJSONObject(i) ?: continue
+                    val id = todo.optString("id")
+                    val title = todo.optString("title")
+                    if (id.isBlank() || title.isBlank()) continue
+                    add(
+                        WidgetTodo(
+                            id = id,
+                            title = title,
+                            completed = todo.optBoolean("completed", false),
+                        )
+                    )
+                    if (size >= WIDGET_LIMIT) break
+                }
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
     fun totalCount(prefs: SharedPreferences, visibleCount: Int): Int {
         if (prefs.contains(TODOS_TOTAL_KEY)) {
             return prefs.getInt(TODOS_TOTAL_KEY, visibleCount)
@@ -61,6 +93,7 @@ internal object TodoWidgetStore {
         for (id in ids) {
             updateAppWidget(context, manager, id, prefs)
         }
+        TodoGlanceWidget.refreshAll(context)
     }
 
     private fun widgetProjection(todos: JSONArray): JSONArray {

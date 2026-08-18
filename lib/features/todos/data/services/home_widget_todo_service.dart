@@ -13,6 +13,9 @@ class HomeWidgetTodoService {
   static const String _androidWidgetName = TodoWidgetContract.widgetName;
   static const String _qualifiedAndroidName =
       TodoWidgetContract.qualifiedAndroidName;
+  static const String _androidGlanceName = TodoWidgetContract.glanceWidgetName;
+  static const String _qualifiedAndroidGlanceName =
+      TodoWidgetContract.qualifiedAndroidGlanceName;
 
   bool _appGroupReady = false;
 
@@ -37,6 +40,11 @@ class HomeWidgetTodoService {
       androidName: _androidWidgetName,
       iOSName: iosName,
       qualifiedAndroidName: _qualifiedAndroidName,
+    );
+    await HomeWidget.updateWidget(
+      name: _androidGlanceName,
+      androidName: _androidGlanceName,
+      qualifiedAndroidName: _qualifiedAndroidGlanceName,
     );
   }
 

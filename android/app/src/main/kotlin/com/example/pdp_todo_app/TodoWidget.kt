@@ -5,11 +5,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.util.SizeF
 import android.view.View
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
-import org.json.JSONArray
 
 private data class TodoSlot(val rowId: Int, val checkId: Int, val titleId: Int)
 
@@ -23,6 +23,7 @@ private val todoSlots = listOf(
     TodoSlot(R.id.todo_row_7, R.id.todo_check_7, R.id.todo_title_7),
     TodoSlot(R.id.todo_row_8, R.id.todo_check_8, R.id.todo_title_8),
 )
+
 
 class TodoWidget : HomeWidgetProvider() {
     override fun onUpdate(
@@ -59,8 +60,9 @@ internal fun updateAppWidget(
     widgetData: SharedPreferences
 ) {
     val views = RemoteViews(context.packageName, R.layout.todo_widget)
-    val todos = parseTodos(TodoWidgetStore.widgetTodosJson(widgetData))
+    val todos = TodoWidgetStore.parseTodos(TodoWidgetStore.widgetTodosJson(widgetData))
     val listIntent = TodoWidgetIntents.launchIntent(context, TodoWidgetIntents.listUri(), "list")
+    views.setOnClickPendingIntent(R.id.widget_title, listIntent)
     views.setOnClickPendingIntent(R.id.todo_more, listIntent)
 
     if (todos.isEmpty()) {
@@ -76,11 +78,11 @@ internal fun updateAppWidget(
     views.setViewVisibility(R.id.todo_empty, View.GONE)
 
     val heightDp = widgetHeightDp(appWidgetManager.getAppWidgetOptions(appWidgetId))
-    val visibleCount = visibleTodoCount(context, heightDp, todos.size)
+    val fit = fitTodos(context, heightDp, todos.size)
 
     for (index in todoSlots.indices) {
         val slot = todoSlots[index]
-        if (index < visibleCount) {
+        if (index < fit.visibleCount) {
             val todo = todos[index]
             views.setViewVisibility(slot.rowId, View.VISIBLE)
             setChecked(views, slot.checkId, todo.completed)
@@ -100,8 +102,8 @@ internal fun updateAppWidget(
         }
     }
 
-    val remaining = TodoWidgetStore.totalCount(widgetData, todos.size) - visibleCount
-    if (remaining > 0) {
+    val remaining = TodoWidgetStore.totalCount(widgetData, todos.size) - fit.visibleCount
+    if (fit.showMore && remaining > 0) {
         views.setTextViewText(R.id.todo_more, "+ $remaining more")
         views.setViewVisibility(R.id.todo_more, View.VISIBLE)
     } else {
@@ -111,60 +113,48 @@ internal fun updateAppWidget(
     appWidgetManager.updateAppWidget(appWidgetId, views)
 }
 
-private data class WidgetTodo(
-    val id: String,
-    val title: String,
-    val completed: Boolean
-)
+private fun widgetHeightDp(options: Bundle): Int {
+    widgetSizes(options)?.minOfOrNull { it.height.toInt() }?.takeIf { it > 0 }?.let { return it }
+    val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+    val maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
+    return listOf(minHeight, maxHeight).filter { it > 0 }.minOrNull() ?: 110
+}
 
-private fun parseTodos(todosJson: String?): List<WidgetTodo> {
-    if (todosJson.isNullOrBlank()) return emptyList()
-
-    return try {
-        val array = JSONArray(todosJson)
-        buildList(array.length()) {
-            for (i in 0 until array.length()) {
-                val todo = array.optJSONObject(i) ?: continue
-                val id = todo.optString("id")
-                val title = todo.optString("title")
-                if (id.isBlank() || title.isBlank()) continue
-                add(
-                    WidgetTodo(
-                        id = id,
-                        title = title,
-                        completed = todo.optBoolean("completed", false)
-                    )
-                )
-                if (size >= TodoWidgetStore.WIDGET_LIMIT) break
-            }
-        }
-    } catch (_: Exception) {
-        emptyList()
+private fun widgetSizes(options: Bundle): List<SizeF>? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        options.getParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES, SizeF::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        options.getParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES)
     }
 }
 
-private fun widgetHeightDp(options: Bundle): Int {
-    val maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
-    if (maxHeight > 0) return maxHeight
-    val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-    if (minHeight > 0) return minHeight
-    return 110
-}
+internal data class TodoWidgetFit(
+    val visibleCount: Int,
+    val showMore: Boolean,
+)
 
-private fun visibleTodoCount(context: Context, heightDp: Int, total: Int): Int {
-    if (total <= 0) return 0
+internal fun fitTodos(context: Context, heightDp: Int, total: Int): TodoWidgetFit {
+    if (total <= 0) return TodoWidgetFit(0, false)
     val paddingDp = 32
     val titleDp = dimenDp(context, R.dimen.widget_title_height)
     val rowDp = dimenDp(context, R.dimen.widget_todo_row_height)
     val moreDp = dimenDp(context, R.dimen.widget_more_height)
-    val available = heightDp - paddingDp - titleDp
-    if (available < rowDp) return 1.coerceAtMost(total)
+    val available = (heightDp - paddingDp - titleDp).coerceAtLeast(0)
+    val limit = TodoWidgetStore.WIDGET_LIMIT
 
-    val maxWithoutMore = (available / rowDp).coerceAtLeast(1).coerceAtMost(todoSlots.size)
-    if (total <= maxWithoutMore) return total
+    val maxWithoutMore = (available / rowDp).coerceAtMost(limit)
+    if (total <= maxWithoutMore) {
+        return TodoWidgetFit(total, false)
+    }
 
-    val maxWithMore = ((available - moreDp) / rowDp).coerceAtLeast(1).coerceAtMost(todoSlots.size)
-    return maxWithMore.coerceAtMost(total)
+    val maxWithMore = ((available - moreDp) / rowDp).coerceAtMost(limit)
+    if (maxWithMore >= 1) {
+        return TodoWidgetFit(maxWithMore.coerceAtMost(total), true)
+    }
+
+    return TodoWidgetFit(1.coerceAtMost(total).coerceAtMost(maxWithoutMore.coerceAtLeast(1)), false)
 }
 
 private fun dimenDp(context: Context, id: Int): Int {

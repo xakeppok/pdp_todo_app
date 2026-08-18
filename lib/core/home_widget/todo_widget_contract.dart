@@ -1,7 +1,9 @@
-/// Shared contract between Flutter, Android App Widget, and iOS WidgetKit.
+/// Shared contract between Flutter, Android App Widget, Glance widget,
+/// and iOS WidgetKit.
 ///
 /// Keep native copies in sync:
 /// - Android `TodoWidgetStore`
+/// - Android Glance `TodoGlanceWidget`
 /// - iOS `TodoWidgetConfig`
 abstract final class TodoWidgetContract {
   static const scheme = 'todowidget';
@@ -9,6 +11,9 @@ abstract final class TodoWidgetContract {
   static const appGroupId = 'group.com.example.pdpTodoApp';
   static const widgetName = 'TodoWidget';
   static const qualifiedAndroidName = 'com.example.pdp_todo_app.TodoWidget';
+  static const glanceWidgetName = 'TodoGlanceWidgetReceiver';
+  static const qualifiedAndroidGlanceName =
+      'com.example.pdp_todo_app.TodoGlanceWidgetReceiver';
   static const todosKey = 'todos';
   static const widgetTodosKey = 'widget_todos';
   static const todosTotalKey = 'todos_total';

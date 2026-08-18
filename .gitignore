@@ -37,3 +37,6 @@ test/golden/failures/
 
 lefthook-local.yml
 .lefthook-local.yml
+
+docs/home-widgets-session.md
+docs/team-session-theses.md

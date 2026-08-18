@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_widget_description">Your todos at a glance</string>
+    <string name="app_widget_glance_description">PDP: same todos, Jetpack Glance UI</string>
     <string name="widget_title">My Todos</string>
+    <string name="widget_glance_title">My Todos (Glance)</string>
     <string name="widget_empty">No todos yet</string>
     <string name="widget_complete_todo">Complete todo</string>
     <string name="widget_preview_todo_1">Write unit tests</string>
